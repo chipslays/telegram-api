@@ -2,14 +2,14 @@
 
 namespace Telegram;
 
-use Illuminate\Database\Connection;
-use Illuminate\Support\Traits\Conditionable;
-use Telegram\Plugins\Database;
-use Telegram\Plugins\Localization;
 use Telegram\Plugins\Manager as PluginManager;
+use Telegram\Plugins\Database;
 use Telegram\Plugins\Session;
 use Telegram\Plugins\Storage;
+use Telegram\Plugins\Localization;
 use Telegram\Traits\BotApiMethods;
+use Illuminate\Database\Connection;
+use Illuminate\Support\Traits\Conditionable;
 use Exception;
 
 class Bot
