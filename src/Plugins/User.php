@@ -7,6 +7,10 @@ use Telegram\Database\Models\User as UserModel;
 
 class User extends AbstractPlugin
 {
+    protected UserModel $model;
+
+    protected $userId;
+
     public function boot(): void
     {
         $this->userId = $this->bot->payload('*.from.id', $this->bot->payload('*.chat.id'));
@@ -15,16 +19,96 @@ class User extends AbstractPlugin
             return;
         }
 
-        $this->user = $this->find($this->userId);
+        $this->model = $this->find($this->userId);
 
-        if (!$this->user) {
+        if (!$this->model) {
             $this->createUser();
         }
     }
 
-    public function find($userId)
+    public function onAfterRun(): void
+    {
+        if (!$this->userId) {
+            return;
+        }
+
+        $this->model->last_message = Carbon::now();
+        $this->model->is_blocked = false;
+        $this->model->save();
+    }
+
+    /**
+     * Get user model.
+     *
+     * @param string|int $userId
+     * @return UserModel|null
+     */
+    public function find(string|int $userId): UserModel|null
     {
         return UserModel::find($userId);
+    }
+
+    /**
+     * Check exists user in database.
+     *
+     * @param string|int $userId
+     * @return bool
+     */
+    public static function exists(string|int $userId): bool
+    {
+        return UserModel::where('id', $userId)->exists();
+    }
+
+    public function __get($key)
+    {
+        return $this->model->{$key};
+    }
+
+    public function __set($key, $value)
+    {
+        $this->model->{$key} = $value;
+    }
+
+    public function save()
+    {
+        $this->model->save();
+    }
+
+    public function model()
+    {
+        return $this->model;
+    }
+
+    /**
+     * Ban user from context.
+     *
+     * @param string $comment
+     * @param Carbon $endAt
+     * @return void
+     */
+    public function ban(string $comment, Carbon $endAt): void
+    {
+        $this->model->update([
+            'is_banned' => true,
+            'ban_comment' => $comment,
+            'ban_start_at' => Carbon::now(),
+            'ban_end_at' => $endAt,
+        ]);
+    }
+
+    /**
+     * Unban user from context.
+     *
+     * @return void
+     */
+    public function unban(): void
+    {
+        $this->model->update([
+            'is_banned' => false,
+            'ban_comment' => null,
+            'ban_start_at' => null,
+            'ban_end_at' => null,
+        ]);
     }
 
     protected function createUser(): void
@@ -65,12 +149,12 @@ class User extends AbstractPlugin
             'ban_end_at' => null,
             'utm_source' => $utmSource,
             'bot_version' => null,
-            'first_message' => Carbon::now(),
-            'last_message' => Carbon::now(),
+            'first_message_at' => Carbon::now(),
+            'last_message_at' => Carbon::now(),
             'extra' => null,
             'note' => null,
         ]);
 
-        $this->user = $this->find($this->userId);
+        $this->model = $this->find($this->userId);
     }
 }

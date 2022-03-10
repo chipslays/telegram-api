@@ -73,9 +73,9 @@ $bot->plugins([
     [
         'plugin' => Session::class,
     ],
-    // [
-    //     'plugin' => User::class,
-    // ],
+    [
+        'plugin' => User::class,
+    ],
 ]);
 
 $bot->components([
@@ -86,8 +86,8 @@ $bot->components([
 ]);
 
 
-$migrator = new Migrator($bot, $bot->db());
-$migrator->up('users');
+// $migrator = new Migrator($bot);
+// $migrator->up('users');
 
 
 $bot->storage(['test' => 'good']);

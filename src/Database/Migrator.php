@@ -5,18 +5,18 @@ namespace Telegram\Database;
 use Telegram\Bot;
 use Telegram\Database\Migrations\Users;
 use Illuminate\Database\Schema\Builder;
-use Exception;
 use Illuminate\Database\Capsule\Manager as Capsule;
+use Telegram\Plugins\Database;
+use Exception;
 
 class Migrator
 {
     protected Builder $schema;
 
-    public function __construct(protected Bot $bot, $schema)
+    public function __construct(protected Bot $bot, ?string $schema = null)
     {
         /** @var Capsule */
         $capsule = $this->bot->plugin(Database::class)->capsule();
-
         $this->schema = $capsule->schema($schema);
     }
 
