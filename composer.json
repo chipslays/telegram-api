@@ -1,0 +1,21 @@
+{
+    "name": "chipslays/telegram",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "chipslays/collection": "^1.1",
+        "symfony/var-dumper": "^5.4",
+        "illuminate/database": "^8.78",
+        "illuminate/pagination": "^8.63",
+        "wamania/php-stemmer": "2.0",
+        "respect/validation": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Telegram\\": "src/"
+        },
+        "files": [
+            "helpers.php"
+        ]
+    }
+}
