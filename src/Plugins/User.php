@@ -32,7 +32,7 @@ class User extends AbstractPlugin
             return;
         }
 
-        $this->model->last_message = Carbon::now();
+        $this->model->last_message_at = Carbon::now();
         $this->model->is_blocked = false;
         $this->model->save();
     }
