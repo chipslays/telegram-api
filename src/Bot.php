@@ -3,6 +3,7 @@
 namespace Telegram;
 
 use Exception;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Conditionable;
 use Telegram\Plugins\Localization;
 use Telegram\Plugins\Manager as PluginManager;
@@ -39,9 +40,9 @@ class Bot
         $this->plugins = new PluginManager($this);
     }
 
-    public function plugins(array $plugins)
+    public function plugins(array $plugins = null)
     {
-        $this->plugins->load($plugins);
+        return $plugins ? $this->plugins->load($plugins) : $this->plugins;
     }
 
     public function plugin(string $plugin)
@@ -473,7 +474,7 @@ class Bot
 
     public function storage(string|int|array $key = null, mixed $default = null)
     {
-        $storage = $this->plugins->get(Storage::class);
+        $storage = $this->plugin(Storage::class);
 
         if ($key === null) {
             return $storage;
@@ -491,7 +492,7 @@ class Bot
 
     public function session(string|int|array $key = null, mixed $default = null)
     {
-        $session = $this->plugins->get(Session::class);
+        $session = $this->plugin(Session::class);
 
         if ($key === null) {
             return $session;
@@ -509,11 +510,23 @@ class Bot
 
     public function localization()
     {
-        return $this->plugins->get(Localization::class);
+        return $this->plugin(Localization::class);
     }
 
     public function trans(string $key, ?array $replacements = null, string $locale = null)
     {
         return $this->localization()->trans($key, $replacements, $locale);
+    }
+
+    /**
+     * Get database connection.
+     *
+     * @return Connection
+     */
+    public function db(string $connetion = 'default'): Connection
+    {
+        $database = $this->plugin(Database::class);
+
+        return $database->connection($connetion);
     }
 }

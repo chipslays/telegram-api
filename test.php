@@ -2,9 +2,12 @@
 
 use Telegram\Api;
 use Telegram\Bot;
+use Telegram\Database\Migrator;
+use Telegram\Plugins\Database;
 use Telegram\Plugins\Localization;
 use Telegram\Plugins\Session;
 use Telegram\Plugins\Storage;
+use Telegram\Plugins\User;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -20,6 +23,36 @@ $bot->withWebhook([
 ]);
 
 $bot->plugins([
+    [
+        'plugin' => Database::class,
+        'config' => [
+            'driver' => 'mysql',
+            'drivers' => [
+                'sqlite' => [
+                    'prefix' => 'litegram_',
+                    'database' => 'path/to/database.sqlite',
+                ],
+                'mysql' => [
+                    'host' => 'localhost',
+                    'prefix' => '',
+                    'database' => 'litegram',
+                    'username' => 'root',
+                    'password' => '',
+                    'charset' => 'utf8mb4',
+                    'collation' => 'utf8mb4_unicode_ci',
+                ],
+                'pgsql' => [
+                    'host' => 'localhost',
+                    'prefix' => 'litegram_',
+                    'database' => 'litegram',
+                    'username' => 'litegram',
+                    'password' => 'litegram',
+                    'charset' => 'utf8mb4',
+                    'collation' => 'utf8mb4_unicode_ci',
+                ],
+            ],
+        ],
+    ],
     [
         'plugin' => Localization::class,
         'config' => [
@@ -40,6 +73,9 @@ $bot->plugins([
     [
         'plugin' => Session::class,
     ],
+    // [
+    //     'plugin' => User::class,
+    // ],
 ]);
 
 $bot->components([
@@ -48,6 +84,11 @@ $bot->components([
         'config' => ['foo' => 'bar'],
     ],
 ]);
+
+
+$migrator = new Migrator($bot, $bot->db());
+$migrator->up('users');
+
 
 $bot->storage(['test' => 'good']);
 dump($bot->storage('test'));

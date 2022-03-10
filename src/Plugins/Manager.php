@@ -8,6 +8,8 @@ class Manager
 {
     protected array $plugins = [];
 
+    protected array $config = [];
+
     public function __construct(protected Bot $bot)
     {
 
@@ -19,7 +21,13 @@ class Manager
             $instance = new $data['plugin']($this->bot, $data['config'] ?? []);
             call_user_func([$instance, 'boot']);
             $this->plugins[$data['plugin']] = $instance;
+            $this->config[$data['plugin']] = $data['config'] ?? [];
         }
+    }
+
+    public function config(string $plugin)
+    {
+        return $this->config[$plugin];
     }
 
     public function get(string $plugin)
