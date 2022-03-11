@@ -2,6 +2,9 @@
 
 namespace Telegram\Traits;
 
+use Telegram\Response;
+use Telegram\Support\InputFile;
+
 trait BotApiMethods
 {
     public function mappingParameters(array $parameters = [], array|string|null $keyboard = null, array $extra = []): array
@@ -107,6 +110,8 @@ trait BotApiMethods
      * - `record_video_note` or `upload_video_note` for video notes.
      *
      * @see https://core.telegram.org/bots/api#sendchataction
+     *
+     * @return Response
      */
     public function sendChatAction(string|int $chatId, string $action = 'typing')
     {
@@ -118,6 +123,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendmessage
+     *
+     * @return Response
      */
     public function sendMessage(string|int $chatId, string $text, array|string|null $keyboard = null, array $extra = [])
     {
@@ -129,6 +136,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#forwardmessage
+     *
+     * @return Response
      */
     public function forwardMessage(string|int $chatId, string|int $fromChatId, string|int $messageId, array $extra = [])
     {
@@ -141,6 +150,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#copymessage
+     *
+     * @return Response
      */
     public function copyMessage(string|int $fromChatId, string|int $toChatId, string|int $messageId, array $extra = [])
     {
@@ -153,6 +164,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendpoll
+     *
+     * @return Response
      */
     public function sendPoll(string|int $chatId, string $question, array $options, array|string|null $keyboard = null, array $extra = [])
     {
@@ -165,6 +178,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendphoto
+     *
+     * @return Response
      */
     public function sendPhoto(string|int $chatId, string|InputFile $photo, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -177,6 +192,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendaudio
+     *
+     * @return Response
      */
     public function sendAudio(string|int $chatId, string|InputFile $audio, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -189,6 +206,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#senddocument
+     *
+     * @return Response
      */
     public function sendDocument(string|int $chatId, string|InputFile $document, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -201,6 +220,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendanimation
+     *
+     * @return Response
      */
     public function sendAnimation(string|int $chatId, string|InputFile $animation, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -213,6 +234,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendvideo
+     *
+     * @return Response
      */
     public function sendVideo(string|int $chatId, string|InputFile $video, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -225,6 +248,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendvideonote
+     *
+     * @return Response
      */
     public function sendVideoNote(string|int $chatId, string|InputFile $videoNote, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -237,6 +262,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendsticker
+     *
+     * @return Response
      */
     public function sendSticker(string|int $chatId, string|InputFile $sticker, array|string|null $keyboard = null, array $extra = [])
     {
@@ -248,6 +275,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendvoice
+     *
+     * @return Response
      */
     public function sendVoice(string|int $chatId, string|InputFile $voice, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
@@ -260,6 +289,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendmediagroup
+     *
+     * @return Response
      */
     public function sendMediaGroup(string|int $chatId, array $media, array $extra = [])
     {
@@ -271,6 +302,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendlocation
+     *
+     * @return Response
      */
     public function sendLocation(string|int $chatId, int|float $latitude, int|float $longitude, array|string|null $keyboard = null, array $extra = [])
     {
@@ -290,6 +323,8 @@ trait BotApiMethods
      * - `🎰`, `777`, `slots`
      *
      * @see https://core.telegram.org/bots/api#senddice
+     *
+     * @return Response
      */
     public function sendDice(string|int $chatId, string $emoji = '🎲', array|string|null $keyboard = null, array $extra = [])
     {
@@ -307,6 +342,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getuserprofilephotos
+     *
+     * @return Response
      */
     public function getUserProfilePhotos(string|int $userId, int $offset = 0, int $limit = 100)
     {
@@ -319,6 +356,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getfile
+     *
+     * @return Response
      */
     public function getFile(string $fileId)
     {
@@ -329,6 +368,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#banchatmember
+     *
+     * @return Response
      */
     public function banChatMember(string|int $chatId, string|int $userId, int $untilDate, bool $revokeMessages = false)
     {
@@ -342,6 +383,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#unbanchatmember
+     *
+     * @return Response
      */
     public function unbanChatMember(string|int $chatId, string|int $userId, bool $onlyIfBanned = false)
     {
@@ -354,6 +397,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#restrictchatmember
+     *
+     * @return Response
      */
     public function restrictChatMember(string|int $chatId, string|int $userId, int $untilDate, array $permissions = [])
     {
@@ -367,6 +412,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#promotechatmember
+     *
+     * @return Response
      */
     public function promoteChatMember(string|int $chatId, string|int $userId, array $extra = [])
     {
@@ -378,6 +425,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setchatadministratorcustomtitle
+     *
+     * @return Response
      */
     public function setChatAdministratorCustomTitle(string|int $chatId, string|int $userId, string $title = '')
     {
@@ -390,6 +439,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setchatpermissions
+     *
+     * @return Response
      */
     public function setChatPermissions(string|int $chatId, array $permissions)
     {
@@ -401,6 +452,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#exportchatinvitelink
+     *
+     * @return Response
      */
     public function exportChatInviteLink(string|int $chatId)
     {
@@ -411,6 +464,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#createchatinvitelink
+     *
+     * @return Response
      */
     public function createChatInviteLink(string|int $chatId, array $extra = [])
     {
@@ -421,6 +476,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#editchatinvitelink
+     *
+     * @return Response
      */
     public function editChatInviteLink(string|int $chatId, string $inviteLink, array $extra = [])
     {
@@ -432,6 +489,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#revokechatinvitelink
+     *
+     * @return Response
      */
     public function revokeChatInviteLink(string|int $chatId, string $inviteLink)
     {
@@ -443,6 +502,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#approvechatjoinrequest
+     *
+     * @return Response
      */
     public function approveChatJoinRequest(string|int $chatId, string|int $userId)
     {
@@ -454,6 +515,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#declinechatjoinrequest
+     *
+     * @return Response
      */
     public function declineChatJoinRequest(string|int $chatId, string|int $userId)
     {
@@ -465,6 +528,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setchatphoto
+     *
+     * @return Response
      */
     public function setChatPhoto(string|int $chatId, InputFile $photo)
     {
@@ -476,6 +541,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#deletechatphoto
+     *
+     * @return Response
      */
     public function deleteChatPhoto(string|int $chatId)
     {
@@ -486,6 +553,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setchattitle
+     *
+     * @return Response
      */
     public function setChatTitle(string|int $chatId, string $title)
     {
@@ -497,6 +566,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setchatdescription
+     *
+     * @return Response
      */
     public function setChatDescription(string|int $chatId, string $description = '')
     {
@@ -508,6 +579,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#pinchatmessage
+     *
+     * @return Response
      */
     public function pinChatMessage(string|int $chatId, string|int $messageId, bool $disableNotification = false)
     {
@@ -520,6 +593,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#unpinchatmessage
+     *
+     * @return Response
      */
     public function unpinChatMessage(string|int $chatId, string|int $messageId)
     {
@@ -531,6 +606,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#unpinallchatmessages
+     *
+     * @return Response
      */
     public function unpinAllChatMessages(string|int $chatId)
     {
@@ -541,6 +618,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#leavechat
+     *
+     * @return Response
      */
     public function leaveChat(string|int $chatId)
     {
@@ -551,6 +630,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getchat
+     *
+     * @return Response
      */
     public function getChat(string|int $chatId)
     {
@@ -561,6 +642,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getchatadministrators
+     *
+     * @return Response
      */
     public function getChatAdministrators(string|int $chatId)
     {
@@ -571,6 +654,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getchatmembercount
+     *
+     * @return Response
      */
     public function getChatMemberCount(string|int $chatId)
     {
@@ -581,6 +666,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getchatmember
+     *
+     * @return Response
      */
     public function getChatMember(string|int $chatId, string|int $userId)
     {
@@ -592,6 +679,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setchatstickerset
+     *
+     * @return Response
      */
     public function setChatStickerSet(string|int $chatId, string $stickerSetName)
     {
@@ -603,6 +692,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#deletechatstickerset
+     *
+     * @return Response
      */
     public function deleteChatStickerSet(string|int $chatId)
     {
@@ -613,6 +704,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#editmessagetext
+     *
+     * @return Response
      */
     public function editMessageText(string|int $messageId, string|int $chatId, string $text, array|string|null $keyboard = null, array $extra = [])
     {
@@ -625,6 +718,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#editmessagecaption
+     *
+     * @return Response
      */
     public function editMessageCaption(string|int $messageId, string|int $chatId, string $caption, array|string|null $keyboard = null, array $extra = [])
     {
@@ -637,6 +732,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#editmessagemedia
+     *
+     * @return Response
      */
     public function editMessageMedia(string|int $messageId, string|int $chatId, array $media, array|string|null $keyboard = null, array $extra = [])
     {
@@ -649,6 +746,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#editmessagereplymarkup
+     *
+     * @return Response
      */
     public function editMessageReplyMarkup(string|int $messageId, string|int $chatId, array|string|null $keyboard = null, array $extra = [])
     {
@@ -660,6 +759,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#stoppoll
+     *
+     * @return Response
      */
     public function stopPoll(string|int $messageId, string|int $chatId, array|string|null $keyboard = null)
     {
@@ -671,6 +772,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#deletemessage
+     *
+     * @return Response
      */
     public function deleteMessage(string|int $messageId, string|int $chatId)
     {
@@ -682,6 +785,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getstickerset
+     *
+     * @return Response
      */
     public function getStickerSet(string $name)
     {
@@ -692,6 +797,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#deletestickerfromset
+     *
+     * @return Response
      */
     public function deleteStickerFromSet(string $sticker)
     {
@@ -702,6 +809,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#uploadstickerfile
+     *
+     * @return Response
      */
     public function uploadStickerFile(string|int $userId, InputFile $image)
     {
@@ -713,6 +822,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#createnewstickerset
+     *
+     * @return Response
      */
     public function createNewStickerSet(string|int $userId, string $name, string $title, array $extra = [])
     {
@@ -725,17 +836,22 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#addstickertoset
+     *
+     * @return Response
      */
     public function addStickerToSet(string|int $userId, string $name, string $emojis, array $extra = [])
     {
         return $this->method(__FUNCTION__, $this->mappingParameters([
             'user_id' => $userId,
             'name' => $name,
+            'emojis' => $emojis,
         ], extra: $extra));
     }
 
     /**
      * @see https://core.telegram.org/bots/api#setstickerpositioninset
+     *
+     * @return Response
      */
     public function setStickerPositionInSet(string $sticker, int $position)
     {
@@ -747,6 +863,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setstickersetthumb
+     *
+     * @return Response
      */
     public function setStickerSetThumb(string|int $userId, string $name, InputFile|string $thumb)
     {
@@ -759,6 +877,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#sendgame
+     *
+     * @return Response
      */
     public function sendGame(string|int $chatId, string $name, array|string|null $keyboard = null, array $extra = [])
     {
@@ -770,6 +890,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setgamescore
+     *
+     * @return Response
      */
     public function setGameScore(string|int $userId, int $score, array $extra = [])
     {
@@ -781,6 +903,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getgamehighscores
+     *
+     * @return Response
      */
     public function getGameHighScores(string|int $userId, array $extra = [])
     {
@@ -791,6 +915,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#answercallbackquery
+     *
+     * @return Response
      */
     public function answerCallbackQuery(array $parameters = [])
     {
@@ -801,6 +927,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#answerinlinequery
+     *
+     * @return Response
      */
     public function answerInlineQuery(array $results = [], array $extra = [])
     {
@@ -812,6 +940,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setmycommands
+     *
+     * @return Response
      */
     public function setMyCommands(array $commands, ?array $scope = null, ?string $language = null)
     {
@@ -824,6 +954,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#deletemycommands
+     *
+     * @return Response
      */
     public function deleteMyCommands(?array $scope = null, ?string $language = null)
     {
@@ -835,6 +967,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getmycommands
+     *
+     * @return Response
      */
     public function getMyCommands()
     {

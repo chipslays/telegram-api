@@ -7,6 +7,7 @@ use Telegram\Plugins\Database;
 use Telegram\Plugins\Localization;
 use Telegram\Plugins\Session;
 use Telegram\Plugins\Storage;
+use Telegram\Plugins\Telegraph;
 use Telegram\Plugins\User;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -18,7 +19,7 @@ $bot = new Bot($api);
 $bot->withWebhook([
     'from' => ['id' => '436432850', 'language_code' => 'ru'],
     'message' => [
-        'text' => '.version',
+        'text' => '.form',
     ],
 ]);
 
@@ -76,6 +77,9 @@ $bot->plugins([
     [
         'plugin' => User::class,
     ],
+    [
+        'plugin' => Telegraph::class,
+    ],
 ]);
 
 $bot->components([
@@ -90,46 +94,59 @@ $bot->components([
 // $migrator->up('users');
 
 
-$bot->storage(['test' => 'good']);
-dump($bot->storage('test'));
+// $bot->storage(['test' => 'good']);
+// dump($bot->storage('test'));
 
-$bot->session(['test' => 'good']);
-dump($bot->session('test'));
+// $bot->session(['test' => 'good']);
+// dump($bot->session('test'));
 
-$storage = $bot->plugin(Storage::class);
-$storage->set('foo', 'bar');
-dump($storage->get('foo'));
+// $storage = $bot->plugin(Storage::class);
+// $storage->set('foo', 'bar');
+// dump($storage->get('foo'));
 
-$session = $bot->plugin(Session::class);
-$session->set('foo', 'bar1');
-dump($session->get('foo'));
+// $session = $bot->plugin(Session::class);
+// $session->set('foo', 'bar1');
+// dump($session->get('foo'));
 
-$localization = $bot->plugin(Localization::class);
-$localization->patch(__DIR__ . '/examples/localization/ru.1.json', 'ru', 'json');
-dump($localization->trans('HELLO', ['{name}' => 'Alex']));
-dump($bot->trans('HELLO', ['{name}' => 'Alex']));
-dump($localization->trans('BYE', ['{name}' => 'Alex']));
+// $localization = $bot->plugin(Localization::class);
+// $localization->patch(__DIR__ . '/examples/localization/ru.1.json', 'ru', 'json');
+// dump($localization->trans('HELLO', ['{name}' => 'Alex']));
+// dump($bot->trans('HELLO', ['{name}' => 'Alex']));
+// dump($localization->trans('BYE', ['{name}' => 'Alex']));
 
-$bot->on(['message.text' => 'Hello'], function ($bot) {
-    dump(123);
-    // $bot->sendMessage('436432850', 'v5.0');
+// $bot->on(['message.text' => 'Hello'], function ($bot) {
+//     dump(123);
+//     // $bot->sendMessage('436432850', 'v5.0');
+// });
+
+// $bot->command('start', function ($bot) {
+//     dump('start!');
+// });
+
+$bot->command('form', function ($bot) {
+    dump('11111 send you name');
+    $bot->conversation('form:name');
 });
 
-$bot->command('start', function ($bot) {
-    dump('start!');
+$bot->conversation('form:name', 'form:email', function ($bot) {
+    dump('22222 your name!');
 });
 
-$bot->onBeforeRun(function () {
-    dump('before');
+$bot->conversation('form:email', handler: function ($bot) {
+    dump('your email!');
 });
 
-$bot->onAfterRun(function () {
-    dump('after');
-});
+// $bot->onBeforeRun(function () {
+//     dump('before');
+// });
 
-$bot->onFallback('message.text', function () {
-    dump('default');
-});
+// $bot->onAfterRun(function () {
+//     dump('after');
+// });
+
+// $bot->onFallback('message.text', function () {
+//     dump('default');
+// });
 
 $bot->run();
 

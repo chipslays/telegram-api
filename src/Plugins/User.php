@@ -80,7 +80,7 @@ class User extends AbstractPlugin
     }
 
     /**
-     * Ban user from context.
+     * Ban user.
      *
      * @param string $comment
      * @param Carbon $endAt
@@ -97,7 +97,7 @@ class User extends AbstractPlugin
     }
 
     /**
-     * Unban user from context.
+     * Unban user.
      *
      * @return void
      */
@@ -128,7 +128,6 @@ class User extends AbstractPlugin
         $language = 'en';
         if ($this->bot->plugins()->has(Localization::class)) {
             $config = $this->bot->plugins()->config(Localization::class);
-            dump($config);
             $language = $config['locale'];
         }
 

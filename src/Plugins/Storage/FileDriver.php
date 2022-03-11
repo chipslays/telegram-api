@@ -27,7 +27,7 @@ class FileDriver extends AbstractDriver implements DriverInterface
     {
         if ($this->has($key)) {
             $filepath = $this->getPath($key);
-            unset($filepath);
+            unlink($filepath);
         }
     }
 

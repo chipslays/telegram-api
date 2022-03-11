@@ -11,11 +11,14 @@ use Telegram\Traits\BotApiMethods;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Conditionable;
 use Exception;
+use Telegram\Plugins\Telegraph;
+use Telegram\Support\Traits\Variable;
 
 class Bot
 {
     use BotApiMethods;
     use Conditionable;
+    use Variable;
 
     protected $events = [];
 
@@ -28,6 +31,8 @@ class Bot
     protected $afterRun = [];
 
     protected $fallbackRun = [];
+
+    protected bool $eventsIsSkipped = false;
 
     protected Keyboard $keyboard;
 
@@ -48,7 +53,13 @@ class Bot
 
     public function plugin(string $plugin)
     {
-        return $this->plugins->get($plugin);
+        $instance = $this->plugins->get($plugin);
+
+        if (!$instance) {
+            throw new Exception("Plugin '{$plugin}' not exists.");
+        }
+
+        return $instance;
     }
 
     public function method(string $method, array $parameters = []): Response
@@ -156,18 +167,22 @@ class Bot
             call_user_func([$plugin, 'onBeforeRun']);
         }
 
-        $fired = $this->processEvents();
+        if (!$this->eventsIsSkipped()) {
+            $fired = $this->processEvents();
 
-        if (!$fired) {
-            foreach ($this->fallbackRun as $fallback) {
-                foreach ((array) $fallback['pattern'] as $pattern) {
-                    if ($this->payload()->has($pattern)) {
-                        call_user_func_array($fallback['fn'], [$this]);
-                        break;
+            if (!$fired) {
+                foreach ($this->fallbackRun as $fallback) {
+                    foreach ((array) $fallback['pattern'] as $pattern) {
+                        if ($this->payload()->has($pattern)) {
+                            call_user_func_array($fallback['fn'], [$this]);
+                            break;
+                        }
                     }
                 }
             }
         }
+
+        $this->unskipEvents();
 
         $afterRun = $this->afterRun;
         ksort($afterRun);
@@ -519,6 +534,11 @@ class Bot
         return $this->localization()->trans($key, $replacements, $locale);
     }
 
+    public function telegraph()
+    {
+        return $this->plugin(Telegraph::class);
+    }
+
     /**
      * Get database connection.
      *
@@ -529,5 +549,53 @@ class Bot
         $database = $this->plugin(Database::class);
 
         return $database->connection($connetion);
+    }
+
+    public function conversation(string $needle, string|null $next = null, callable $handler = null, array $excepts = []): self
+    {
+        if (func_num_args() == 1) {
+            $this->session(['telegram:conversation' => $needle]);
+            $this->var(['telegram:conversation_skip' => true]);
+            return $this;
+        }
+
+        if ($this->var('telegram:conversation_skip')) {
+            return $this;
+        }
+
+        if ($this->session('telegram:conversation') !== $needle) {
+            return $this;
+        }
+
+        $this->var(['telegram:conversation_skip' => true]);
+
+        $result = call_user_func_array($handler, [$this]);
+
+        if ($result !== false) {
+            if ($next === null) {
+                $this->session()->delete('telegram:conversation');
+            } else {
+                $this->session(['telegram:conversation' => $next]);
+            }
+        }
+
+        $this->skipEvents();
+
+        return $this;
+    }
+
+    public function skipEvents()
+    {
+        $this->eventsIsSkipped = true;
+    }
+
+    public function unskipEvents()
+    {
+        $this->eventsIsSkipped = false;
+    }
+
+    public function eventsIsSkipped(): bool
+    {
+        return $this->eventsIsSkipped;
     }
 }
