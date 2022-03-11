@@ -33,6 +33,10 @@ class Localization extends AbstractPlugin
 
     protected function parse(string $path, $driver = null)
     {
+        if (!file_exists($path)) {
+            return;
+        }
+
         switch ($driver ?? $this->plugin['driver']) {
             case 'json':
                 return json_decode(file_get_contents($path), true);
@@ -74,8 +78,8 @@ class Localization extends AbstractPlugin
             $this->load($this->plugin['fallback']);
         }
 
-        if (isset($this->locales[$this->fallback][$key])) {
-            return $this->locales[$this->fallback][$key];
+        if (isset($this->locales[$this->plugin['fallback']][$key])) {
+            return $this->locales[$this->plugin['fallback']][$key];
         }
 
         return $key;
