@@ -10,10 +10,10 @@ use Telegram\Plugins\Localization;
 use Telegram\Traits\BotApiMethods;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Conditionable;
-use Litegram\Traits\Telegram\MethodsAliases;
 use Telegram\Plugins\Telegraph;
 use Telegram\Support\Traits\Variable;
 use Telegram\Traits\Replies;
+use Telegram\Traits\MethodsAliases;
 use Exception;
 
 class Bot

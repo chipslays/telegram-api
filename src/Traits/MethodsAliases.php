@@ -1,6 +1,6 @@
 <?php
 
-namespace Litegram\Traits\Telegram;
+namespace Telegram\Traits;
 
 use Telegram\Response;
 use Telegram\Support\Util;

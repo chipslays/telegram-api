@@ -123,18 +123,7 @@ $bot->components([
 //     dump('start!');
 // });
 
-$bot->command('form', function ($bot) {
-    dump('11111 send you name');
-    $bot->conversation('form:name');
-});
 
-$bot->conversation('form:name', 'form:email', function ($bot) {
-    dump('22222 your name!');
-});
-
-$bot->conversation('form:email', handler: function ($bot) {
-    dump('your email!');
-});
 
 // $bot->onBeforeRun(function () {
 //     dump('before');
@@ -144,17 +133,28 @@ $bot->conversation('form:email', handler: function ($bot) {
 //     dump('after');
 // });
 
-// $bot->onFallback('message.text', function () {
-//     dump('default');
-// });
+$bot->command('form', function ($bot) {
+    // $bot->say('Отправь твое имя:');
+    dump('Отправь твое имя:');
+    $bot->conversation('form:name');
+});
+
+$bot->conversation('form:name', 'form:email', function ($bot) {
+    // $bot->say('Отправь почту:');
+    dump('Отправь почту:');
+});
+
+$bot->conversation('form:email', handler: function ($bot) {
+    // $bot->say('Спасибо!');
+    dump('Спасибо');
+});
 
 $bot->run();
 
+// $bot->onFallback('message.text', function ($bot) {
+//     $bot->say('Дефолтный ответ');
+// });
+
 // $bot->polling(function ($bot) {
 //     print_r($bot->payload()->all());
-
-//     $bot->hear('hello', function ($bot) {
-//         dump(123);
-//         $bot->sendMessage('436432850', 'v5.0');
-//     });
 // });
