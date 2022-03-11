@@ -27,14 +27,14 @@ trait Replies
         return $this->sendChatAction($this->getChatId(), $action);
     }
 
-    // /**
-    //  * @TODO
-    //  * @return Response
-    //  */
-    // public function replyWithReply(string|int $messageId, $text = '', $keyboard = null, $extra = [])
-    // {
-    //     return $this->sendReply($this->getChatId(), $messageId, $text, $keyboard, $extra);
-    // }
+    /**
+     * @TODO
+     * @return Response
+     */
+    public function replyWithReply(string|int $messageId, string $text = '', array|string|null $keyboard = null, array $extra = [])
+    {
+        return $this->sendReply($this->getChatId(), $messageId, $text, $keyboard, $extra);
+    }
 
     /**
      * @TODO

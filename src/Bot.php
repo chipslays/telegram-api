@@ -10,15 +10,19 @@ use Telegram\Plugins\Localization;
 use Telegram\Traits\BotApiMethods;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Traits\Conditionable;
-use Exception;
+use Litegram\Traits\Telegram\MethodsAliases;
 use Telegram\Plugins\Telegraph;
 use Telegram\Support\Traits\Variable;
+use Telegram\Traits\Replies;
+use Exception;
 
 class Bot
 {
     use BotApiMethods;
-    use Conditionable;
+    use MethodsAliases;
+    use Replies;
     use Variable;
+    use Conditionable;
 
     protected $events = [];
 
@@ -549,6 +553,31 @@ class Bot
         $database = $this->plugin(Database::class);
 
         return $database->connection($connetion);
+    }
+
+    /**
+     * Get `Keyboard` instance or make keyboard (by method `Keyboard::show(...)`) if arguments was passed.
+     *
+     * @param array|string $keyboard
+     * @param string|null $placeholder
+     * @param boolean $oneTime
+     * @param boolean $resize
+     * @param boolean $selective
+     * @return string|Keyboard
+     */
+    public function keyboard(
+        array|string $keyboard = null,
+        ?string $placeholder = null,
+        bool $oneTime = false,
+        bool $resize = true,
+        bool $selective = false
+    ): string|Keyboard
+    {
+        if (func_num_args() === 0) {
+            return $this->keyboard;
+        }
+
+        return $this->keyboard->show($keyboard, $placeholder, $oneTime, $resize, $selective);
     }
 
     public function conversation(string $needle, string|null $next = null, callable $handler = null, array $excepts = []): self

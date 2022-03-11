@@ -4,6 +4,7 @@ namespace Telegram\Traits;
 
 use Telegram\Response;
 use Telegram\Support\InputFile;
+use Telegram\Support\Util;
 
 trait BotApiMethods
 {
