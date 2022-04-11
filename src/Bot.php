@@ -186,6 +186,7 @@ class Bot
             }
         }
 
+        // reset for polling
         $this->unskipEvents();
 
         $afterRun = $this->afterRun;
@@ -198,6 +199,11 @@ class Bot
         foreach ($this->plugins->all() as $plugin) {
             call_user_func([$plugin, 'onAfterRun']);
         }
+
+        // reset for polling
+        $this->events = [];
+        $this->beforeRun = [];
+        $this->afterRun = [];
     }
 
     protected function processEvents()
@@ -391,7 +397,6 @@ class Bot
                 }
 
                 $this->run();
-                $this->events = [];
             }
         }
     }
