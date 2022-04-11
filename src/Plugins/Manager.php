@@ -10,13 +10,16 @@ class Manager
 
     protected array $config = [];
 
+    protected array $pluginsConfig = [];
+
     public function __construct(protected Bot $bot)
     {
-
+        //
     }
 
     public function load(array $plugins)
     {
+        $this->pluginsConfig = array_merge($this->pluginsConfig, $plugins);
         foreach ($plugins as $data) {
             $instance = new $data['plugin']($this->bot, $data['config'] ?? []);
             call_user_func([$instance, 'boot']);
@@ -38,6 +41,11 @@ class Manager
     public function has(string $plugin)
     {
         return isset($this->plugins[$plugin]);
+    }
+
+    public function reload()
+    {
+        $this->load($this->pluginsConfig);
     }
 
     public function all()

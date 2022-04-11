@@ -381,7 +381,7 @@ class Bot
      */
     public function polling(callable $callback = null, array $getUpdatesExtra = [])
     {
-        echo 'Polling started...' . PHP_EOL;
+        Terminal::print('{text:darkGreen}Polling started...');
 
         $offset = 0;
 
@@ -397,6 +397,9 @@ class Bot
                 }
 
                 $this->run();
+
+                // reload plugins
+                // $this->plugins->reload();
             }
         }
     }
@@ -586,8 +589,13 @@ class Bot
         return $this->keyboard->show($keyboard, $placeholder, $oneTime, $resize, $selective);
     }
 
-    public function conversation(string $needle, string|null $next = null, callable $handler = null, array $excepts = []): self
+    public function conversation(bool|string $needle, string|null $next = null, callable $handler = null, array $excepts = []): self
     {
+        if ($needle === false) {
+            $this->session()->delete('telegram:conversation');
+            return $this;
+        }
+
         if (func_num_args() == 1) {
             $this->session(['telegram:conversation' => $needle]);
             $this->var(['telegram:conversation_skip' => true]);

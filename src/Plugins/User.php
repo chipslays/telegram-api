@@ -7,7 +7,7 @@ use Telegram\Database\Models\User as UserModel;
 
 class User extends AbstractPlugin
 {
-    protected UserModel $model;
+    protected ?UserModel $model;
 
     protected $userId;
 
