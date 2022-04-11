@@ -317,8 +317,9 @@ class Bot
 
         // /ban {user} {?time}
         // $tmp = preg_replace('~.?{\?(.*?)}~m', '(?:([\w\s]+))?', $needle);
-        $tmp = preg_replace('~{\?(.*?)}~m', '(?:([\w\s]+))?', $needle);
+        $tmp = preg_replace('~.?{:(.*?)\?}~m', '(?: ([\w\s]+))?', $needle);
         $pattern = '~^' . preg_replace('~{(.*?)}~um', '([\w\s]+)', $tmp) . '$~um';
+
         if (@preg_match_all($pattern, $haystack, $matches)) {
             return array_filter(array_map(function ($item) {
                 return array_shift($item);
