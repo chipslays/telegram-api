@@ -7,16 +7,14 @@ use Exception;
 
 class Keyboard
 {
-    protected static array $keyboards = [];
+    protected array $keyboards = [];
 
-    protected static ?Bot $bot = null;
-
-    public function __construct(?Bot &$bot = null)
+    public function __construct(protected ?Bot &$bot = null)
     {
-        self::$bot = $bot;
+        //
     }
 
-    public static function show(
+    public function show(
         array|string $keyboard,
         ?string $placeholder = null,
         bool $oneTime = false,
@@ -24,8 +22,11 @@ class Keyboard
         bool $selective = false
     ): string {
         if (!is_array($keyboard)) {
-            $keyboard = static::getKeyboard($keyboard);
+            $keyboard = $this->getKeyboard($keyboard);
         }
+
+        dd($keyboard);
+
 
         $inlineKeys = [
             'text', 'callback_data', 'url', 'login_url', 'switch_inline_query',
@@ -44,13 +45,13 @@ class Keyboard
             !in_array(array_key_last($keyboard[0][0]), $markupReplyKeys) &&
             !in_array(key($keyboard[0][0]), $markupReplyKeys)
         ) {
-            return static::inline($keyboard);
+            return $this->inline($keyboard);
         }
 
-        return static::markup($keyboard, $placeholder, $oneTime, $resize, $selective);
+        return $this->markup($keyboard, $placeholder, $oneTime, $resize, $selective);
     }
 
-    public static function markup(
+    public function markup(
         array|string $keyboard,
         ?string $placeholder = null,
         bool $oneTime = false,
@@ -58,7 +59,7 @@ class Keyboard
         bool $selective = false
     ): string {
         if (!is_array($keyboard)) {
-            $keyboard = static::getKeyboard($keyboard);
+            $keyboard = $this->getKeyboard($keyboard);
         }
 
         $markup = [
@@ -75,17 +76,17 @@ class Keyboard
         return json_encode($markup);
     }
 
-    public static function inline(array|string $keyboard): string
+    public function inline(array|string $keyboard): string
     {
         if (!is_array($keyboard)) {
-            $keyboard = static::getKeyboard($keyboard);
+            $keyboard = $this->getKeyboard($keyboard);
         }
 
         foreach ($keyboard as &$item) {
             $item = array_map(function ($value) {
-                if (isset($value['callback_data']) && is_array($value['callback_data']) && self::$bot !== null) {
-                    $value['callback_data'] = $value['callback_data'][0] . ':' . self::$bot->encodeCallbackData($value['callback_data'][1]);
-                }
+                // if (isset($value['callback_data']) && is_array($value['callback_data']) && $this->bot !== null) {
+                //     $value['callback_data'] = $value['callback_data'][0] . ':' . $this->bot->encodeCallbackData($value['callback_data'][1]);
+                // }
                 return $value;
             }, $item);
         }
@@ -93,7 +94,7 @@ class Keyboard
         return json_encode(['inline_keyboard' => $keyboard]);
     }
 
-    public static function hide(bool $selective = false): string
+    public function hide(bool $selective = false): string
     {
         $markup = [
             'hide_keyboard' => true,
@@ -103,7 +104,7 @@ class Keyboard
         return json_encode($markup);
     }
 
-    public static function forceReply(?string $placeholder = null, bool $selective = false): string
+    public function forceReply(?string $placeholder = null, bool $selective = false): string
     {
         $markup = [
             'force_reply' => true,
@@ -120,17 +121,17 @@ class Keyboard
     /**
      * Set new keyboards with delete previous.
      */
-    public static function set(array $keyboards = []): void
+    public function set(array $keyboards = []): void
     {
-        static::$keyboards = $keyboards;
+        $this->keyboards = $keyboards;
     }
 
     /**
      * Merge already saved keyboards with new.
      */
-    public static function add(array $keyboards = []): void
+    public function add(array $keyboards = []): void
     {
-        static::$keyboards = array_merge(static::$keyboards, $keyboards);
+        $this->keyboards = array_merge($this->keyboards, $keyboards);
     }
 
     /**
@@ -138,17 +139,17 @@ class Keyboard
      *
      * @return void
      */
-    public static function clear(): void
+    public function clear(): void
     {
-        static::$keyboards = [];
+        $this->keyboards = [];
     }
 
-    private static function getKeyboard(string $keyboard)
+    private function getKeyboard(string $keyboard)
     {
-        if (!isset(static::$keyboards[$keyboard])) {
+        if (!isset($this->keyboards[$keyboard])) {
             throw new Exception("Keyboard note exists: '{$keyboard}'", 1);
         }
 
-        $keyboard = static::$keyboards[$keyboard];
+        return $this->keyboards[$keyboard];
     }
 }
