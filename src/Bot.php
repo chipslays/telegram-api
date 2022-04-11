@@ -588,7 +588,7 @@ class Bot
         bool $selective = false
     ): string|Keyboard
     {
-        if (func_num_args() === 0) {
+        if (func_num_args() === 0 || $keyboard === null) {
             return $this->keyboard;
         }
 
