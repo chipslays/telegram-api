@@ -12,7 +12,7 @@ use Telegram\Plugins\User;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$api = new Api('1436866061:AAEaJrIqLkfzqA2E0vtdj2i4UkdvJAY7p68');
+$api = new Api('AAAAAAAAA');
 
 $bot = new Bot($api);
 

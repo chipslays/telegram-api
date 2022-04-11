@@ -118,3 +118,17 @@ if (!function_exists('validate')) {
         }
     }
 }
+
+if (!function_exists('before')) {
+    function before(callable $function, $bot = 'default'): void
+    {
+        bot($bot)->onBeforeRun($function);
+    }
+}
+
+if (!function_exists('after')) {
+    function after(callable $function, $bot = 'default'): void
+    {
+        bot($bot)->onAfterRun($function);
+    }
+}
