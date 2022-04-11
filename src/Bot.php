@@ -323,7 +323,7 @@ class Bot
 
         // /ban {user} {?time}
         // $tmp = preg_replace('~.?{\?(.*?)}~m', '(?:([\w\s]+))?', $needle);
-        $tmp = preg_replace('~.?{:(.*?)\?}~m', '(?: ([\w\s]+))?', $needle);
+        $tmp = preg_replace('~.?{\?(.*?)}~m', '(?: ([\w\s]+))?', $needle);
         $pattern = '~^' . preg_replace('~{(.*?)}~um', '([\w\s]+)', $tmp) . '$~um';
 
         if (@preg_match_all($pattern, $haystack, $matches)) {
@@ -599,6 +599,10 @@ class Bot
     {
         if ($needle === false) {
             $this->session()->delete('telegram:conversation');
+            return $this;
+        }
+
+        if ($this->match($excepts, $this->payload()->all())) {
             return $this;
         }
 
