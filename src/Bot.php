@@ -81,7 +81,7 @@ class Bot
      */
     public function withWebhook(array $payload = null): self
     {
-        if ($payload) {
+        if (is_array($payload)) {
             $this->payload = new Payload($payload, $this);
             $this->boot();
 
