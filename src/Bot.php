@@ -372,7 +372,7 @@ class Bot
         }
     }
 
-    public function listen(): never
+    public function listen(): void
     {
         $this->closeRequest();
         $this->run();
