@@ -595,6 +595,13 @@ class Bot
         return $this->keyboard->show($keyboard, $placeholder, $oneTime, $resize, $selective);
     }
 
+    /**
+     * @param boolean|string $needle
+     * @param string|null|null $next
+     * @param callable|null $handler
+     * @param array $excepts
+     * @return self
+     */
     public function conversation(bool|string $needle, string|null $next = null, callable $handler = null, array $excepts = []): self
     {
         if ($needle === false) {
