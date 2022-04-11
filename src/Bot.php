@@ -372,6 +372,12 @@ class Bot
         }
     }
 
+    public function listen(): never
+    {
+        $this->closeRequest();
+        $this->run();
+    }
+
     /**
      * Polling Telegram updates (long-polling).
      *
