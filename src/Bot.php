@@ -602,8 +602,29 @@ class Bot
             return $this;
         }
 
-        if ($this->match($excepts, $this->payload()->all())) {
-            return $this;
+        foreach ($excepts as $event) {
+            foreach ((array) $event as $key => $value) {
+                if ($value === true) {
+                    return $this;
+                }
+
+                // 'message.text'
+                // ['message', 'callback_query]
+                if (is_numeric($key) && $this->payload()->has($value)) {
+                    return $this;
+                }
+
+                // ['message.text' => 'text']
+                // ['message.text' => ['text1', 'text2]]
+                if (!is_numeric($key)) {
+                    foreach ((array) $value as $needle) {
+                        $result = $this->match($needle, $this->payload($key, ''));
+                        if ($result !== false) {
+                            return $this;
+                        }
+                    }
+                }
+            }
         }
 
         if (func_num_args() == 1) {
