@@ -15,6 +15,7 @@ use Telegram\Support\Traits\Variable;
 use Telegram\Traits\Replies;
 use Telegram\Traits\MethodsAliases;
 use Exception;
+use Telegram\Plugins\User;
 
 class Bot
 {
@@ -502,11 +503,22 @@ class Bot
         );
     }
 
-    public function components(array $components)
+    /**
+     * Set components.
+     *
+     * @param array $components
+     * @return void
+     */
+    public function components(array $components): void
     {
         $this->components = array_merge($this->components, $components);
     }
 
+    /**
+     * @param string|integer|array|null $key
+     * @param mixed $default
+     * @return mixed|Storage
+     */
     public function storage(string|int|array $key = null, mixed $default = null)
     {
         $storage = $this->plugin(Storage::class);
@@ -525,6 +537,11 @@ class Bot
         return $storage->get($key, $default);
     }
 
+    /**
+     * @param string|integer|array|null $key
+     * @param mixed $default
+     * @return mixed|Session
+     */
     public function session(string|int|array $key = null, mixed $default = null)
     {
         $session = $this->plugin(Session::class);
@@ -543,19 +560,39 @@ class Bot
         return $session->get($key, $default);
     }
 
-    public function localization()
+    /**
+     * @return Localization
+     */
+    public function localization(): Localization
     {
         return $this->plugin(Localization::class);
     }
 
-    public function trans(string $key, ?array $replacements = null, string $locale = null)
+    /**
+     * @param string $key
+     * @param array|null $replacements
+     * @param string|null $locale
+     * @return string
+     */
+    public function trans(string $key, ?array $replacements = null, string $locale = null): string
     {
         return $this->localization()->trans($key, $replacements, $locale);
     }
 
-    public function telegraph()
+    /**
+     * @return Telegraph
+     */
+    public function telegraph(): Telegraph
     {
         return $this->plugin(Telegraph::class);
+    }
+
+    /**
+     * @return User
+     */
+    public function user(): User
+    {
+        return $this->plugin(User::class);
     }
 
     /**
@@ -644,6 +681,10 @@ class Bot
         return $this;
     }
 
+    /**
+     * @param array $excepts
+     * @return boolean
+     */
     protected function hasConversationMatchExcepts(array $excepts): bool
     {
         foreach ($excepts as $event) {
@@ -674,16 +715,25 @@ class Bot
         return false;
     }
 
+    /**
+     * @return void
+     */
     public function skipEvents()
     {
         $this->eventsIsSkipped = true;
     }
 
+    /**
+     * @return void
+     */
     public function unskipEvents()
     {
         $this->eventsIsSkipped = false;
     }
 
+    /**
+     * @return boolean
+     */
     public function eventsIsSkipped(): bool
     {
         return $this->eventsIsSkipped;
