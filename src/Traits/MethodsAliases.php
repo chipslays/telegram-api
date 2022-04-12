@@ -63,7 +63,7 @@ trait MethodsAliases
     }
 
     /**
-     * Send notification or alert.
+     * Send notification.
      *
      * Works only for callback.
      *
@@ -72,12 +72,31 @@ trait MethodsAliases
      * @param array $extra
      * @return Response
      */
-    public function notify($text = '', $showAlert = false, $extra = [])
+    public function notification($text = '', $extra = [])
     {
         return $this->method('answerCallbackQuery', $this->mappingParameters([
             'callback_query_id' => $this->payload('callback_query.id'),
             'text' => Util::shuffle($text),
-            'show_alert' => $showAlert,
+            'show_alert' => false,
+        ], null, $extra));
+    }
+
+    /**
+     * Show alert.
+     *
+     * Works only for callback.
+     *
+     * @param string $text
+     * @param boolean $showAlert
+     * @param array $extra
+     * @return Response
+     */
+    public function alert($text = '', $extra = [])
+    {
+        return $this->method('answerCallbackQuery', $this->mappingParameters([
+            'callback_query_id' => $this->payload('callback_query.id'),
+            'text' => Util::shuffle($text),
+            'show_alert' => true,
         ], null, $extra));
     }
 
@@ -88,7 +107,7 @@ trait MethodsAliases
      * @param array $extra
      * @return Response
      */
-    public function action($action = 'typing', $extra = [])
+    public function status($action = 'typing', $extra = [])
     {
         return $this->method('sendChatAction', $this->mappingParameters([
             'chat_id' => $this->getChatId(),
@@ -176,27 +195,27 @@ trait MethodsAliases
      * @param array $extra
      * @return Response
      */
-    public function editCallbackMessage(string $text, $keyboard = null, $extra = [])
-    {
-        if ($this->payload()->isCaption()) {
-            return $this->editMessageCaption(
-                $this->payload('callback_query.message.message_id'),
-                $this->payload('callback_query.from.id'),
-                $text,
-                $keyboard,
-                $extra
-            );
-        } else {
-            return $this->editMessageText(
-                $this->payload('callback_query.message.message_id'),
-                $this->payload('callback_query.from.id'),
-                $text,
-                $keyboard,
-                $extra
-            );
-        }
+    // public function editCallbackMessage(string $text, $keyboard = null, $extra = [])
+    // {
+    //     if ($this->payload()->isCaption()) {
+    //         return $this->editMessageCaption(
+    //             $this->payload('callback_query.message.message_id'),
+    //             $this->payload('callback_query.from.id'),
+    //             $text,
+    //             $keyboard,
+    //             $extra
+    //         );
+    //     } else {
+    //         return $this->editMessageText(
+    //             $this->payload('callback_query.message.message_id'),
+    //             $this->payload('callback_query.from.id'),
+    //             $text,
+    //             $keyboard,
+    //             $extra
+    //         );
+    //     }
 
-    }
+    // }
 
     /**
      * Edit source message received from callback.
@@ -291,5 +310,36 @@ trait MethodsAliases
     public function deleteMessageFromCallback($chatId = null)
     {
         return $this->deleteMessage($this->payload('callback_query.message.message_id'), $chatId ?? $this->payload('*.from.id'));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $text
+     * @param $keyboard
+     * @param array $extra
+     * @return void
+     */
+    public function editActionMessage(string $text, $keyboard = null, array $extra = [])
+    {
+        if ($this->payload('callback_query.message.caption')) {
+            return $this->editMessageCaption(
+                $this->payload('callback_query.message.message_id'),
+                $this->userId,
+                $text,
+                $keyboard,
+                $extra
+            );
+        }
+
+        if ($this->payload('callback_query.message.text')) {
+            return $this->editMessageText(
+                $this->payload('callback_query.message.message_id'),
+                $this->userId,
+                $text,
+                $keyboard,
+                $extra
+            );
+        }
     }
 }
