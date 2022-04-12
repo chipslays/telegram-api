@@ -103,7 +103,7 @@ class Bot
     protected function boot()
     {
         if ($this->payload()->isCallbackQuery()) {
-            $this->userId = $this->payload('*.message.from.id', $this->payload('*.message.chat.id'));
+            $this->userId = $this->payload('*.message.chat.id');
             $this->languageId = $this->payload('*.message.from.language_code');
         } else {
             $this->userId = $this->payload('*.from.id', $this->payload('*.user.id', $this->payload('*.chat.id')));
