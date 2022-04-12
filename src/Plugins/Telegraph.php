@@ -9,7 +9,7 @@ class Telegraph extends Client
 {
     public function __construct(
         protected Bot &$bot,
-        public array $plugin = []
+        public array $config = []
     ) {
         parent::__construct();
         $this->bot = $bot;

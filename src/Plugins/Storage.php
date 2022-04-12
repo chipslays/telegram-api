@@ -12,13 +12,13 @@ class Storage extends AbstractPlugin implements DriverInterface
 
     public function boot(): void
     {
-        switch ($this->plugin['driver']) {
+        switch ($this->config['driver']) {
             case 'file':
-                $this->driver = new FileDriver($this->plugin['file']);
+                $this->driver = new FileDriver($this->config['file']);
                 break;
 
             default:
-                throw new Exception("Unknown storage driver: '{$this->plugin['driver']}'");
+                throw new Exception("Unknown storage driver: '{$this->config['driver']}'");
                 break;
         }
     }

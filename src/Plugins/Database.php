@@ -11,8 +11,8 @@ class Database extends AbstractPlugin
 
     public function boot(): void
     {
-        $driver = $this->plugin['driver'];
-        $config = $this->plugin['drivers'][$driver];
+        $driver = $this->config['driver'];
+        $config = $this->config['drivers'][$driver];
         $config['driver'] = $driver;
 
         $this->capsule = new Capsule;

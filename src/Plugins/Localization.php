@@ -28,7 +28,7 @@ class Localization extends AbstractPlugin
 
     protected function getPath(string $locale)
     {
-        return $this->plugin['path'] . '/' . $locale . '.' . $this->plugin['driver'];
+        return $this->config['path'] . '/' . $locale . '.' . $this->config['driver'];
     }
 
     protected function parse(string $path, $driver = null)
@@ -37,13 +37,13 @@ class Localization extends AbstractPlugin
             return;
         }
 
-        switch ($driver ?? $this->plugin['driver']) {
+        switch ($driver ?? $this->config['driver']) {
             case 'json':
                 return json_decode(file_get_contents($path), true);
                 break;
 
             default:
-                throw new Exception('Unknown localization driver: ' . $driver ?? $this->plugin['driver']);
+                throw new Exception('Unknown localization driver: ' . $driver ?? $this->config['driver']);
                 break;
         }
     }
@@ -74,12 +74,12 @@ class Localization extends AbstractPlugin
         }
 
         // fallback
-        if (!isset($this->locales[$this->plugin['fallback']])) {
-            $this->load($this->plugin['fallback']);
+        if (!isset($this->locales[$this->config['fallback']])) {
+            $this->load($this->config['fallback']);
         }
 
-        if (isset($this->locales[$this->plugin['fallback']][$key])) {
-            return $this->locales[$this->plugin['fallback']][$key];
+        if (isset($this->locales[$this->config['fallback']][$key])) {
+            return $this->locales[$this->config['fallback']][$key];
         }
 
         return $key;

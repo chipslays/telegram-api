@@ -8,7 +8,7 @@ abstract class AbstractPlugin
 {
     public function __construct(
         protected Bot &$bot,
-        public array $plugin = []
+        public array $config = []
     ) {
         $this->bot = $bot;
     }
