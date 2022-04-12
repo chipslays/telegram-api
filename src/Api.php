@@ -47,7 +47,7 @@ class Api
 
         $response = new Response(json_decode($output, true));
 
-        if ($response->isError()) {
+        if ($response->hasError()) {
             dump([
                 'method' => $method,
                 'parameters' => $parameters,

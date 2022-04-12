@@ -30,7 +30,7 @@ class Response extends Collection
     /**
      * @return bool
      */
-    public function isError(): bool
+    public function hasError(): bool
     {
         return $this->ok === false;
     }
