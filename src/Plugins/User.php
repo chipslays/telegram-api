@@ -59,22 +59,34 @@ class User extends AbstractPlugin
         return UserModel::where('id', $userId)->exists();
     }
 
-    public function __get($key)
+    public function __get($key): mixed
     {
         return $this->model->{$key};
     }
 
-    public function __set($key, $value)
+    public function __set($key, $value): void
     {
         $this->model->{$key} = $value;
     }
 
-    public function save()
+    public function get(string $key, mixed $default = null): mixed
+    {
+        return $this->model->{$key} ?? $default;
+    }
+
+    public function set(string $key, mixed $value): self
+    {
+        $this->model->{$key} = $value;
+
+        return $this;
+    }
+
+    public function save(): void
     {
         $this->model->save();
     }
 
-    public function model()
+    public function model(): UserModel
     {
         return $this->model;
     }

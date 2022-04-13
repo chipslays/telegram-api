@@ -14,8 +14,9 @@ use Telegram\Plugins\Telegraph;
 use Telegram\Support\Traits\Variable;
 use Telegram\Traits\Replies;
 use Telegram\Traits\MethodsAliases;
-use Exception;
+use Telegram\Plugins\Logger;
 use Telegram\Plugins\User;
+use Exception;
 
 class Bot
 {
@@ -588,11 +589,34 @@ class Bot
     }
 
     /**
-     * @return User
+     * @param string|array $key
+     * @param mixed $default
+     * @return mixed|User
      */
-    public function user(): User
+    public function user(string|array $key = null, mixed $default = null): mixed
     {
-        return $this->plugin(User::class);
+        /** @var User */
+        $user = $this->plugin(User::class);
+
+        if ($key = null) {
+            return $user;
+        }
+
+        if (is_array($key)) {
+            return $user->model()->update($key);
+        }
+
+        return $user->get((string) $key, $default);
+    }
+
+    /**
+     * @return Logger
+     */
+    public function log(mixed $data, string $title = 'default', string $filePostfix = 'bot'): void
+    {
+        /** @var Logger */
+        $logger = $this->plugin(Logger::class);
+        $logger->put($data, $title, $filePostfix);
     }
 
     /**
