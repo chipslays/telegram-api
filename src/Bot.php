@@ -598,7 +598,7 @@ class Bot
         /** @var User */
         $user = $this->plugin(User::class);
 
-        if ($key = null) {
+        if ($key === null) {
             return $user;
         }
 
