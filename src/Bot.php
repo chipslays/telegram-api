@@ -106,7 +106,7 @@ class Bot
     {
         if ($this->payload()->isCallbackQuery()) {
             $this->userId = $this->payload('*.message.chat.id');
-            $this->languageId = $this->payload('*.message.from.language_code');
+            $this->languageId = $this->payload('*.message.chat.language_code', $this->payload('*.message.reply_to_message.from.language_code'));
         } else {
             $this->userId = $this->payload('*.from.id', $this->payload('*.user.id', $this->payload('*.chat.id')));
             $this->languageId = $this->payload('*.from.language_code', $this->payload('*.user.language_code'));
