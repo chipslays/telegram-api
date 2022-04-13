@@ -1,6 +1,6 @@
 # telegram-api
 
 ```bash
-composer require chipslays/telegram
+composer require chipslays/telegram dev-master
 ```
 
