@@ -17,27 +17,52 @@ class Localization extends AbstractPlugin
         $this->load($this->locale);
     }
 
+    /**
+     * Overwrite locales.
+     *
+     * @param string $locale
+     * @return void
+     */
     public function load(string $locale): void
     {
         $this->locales[$locale] = $this->parse($this->getPath($locale));
     }
 
-    public function patch(string $path, string $locale, $driver = null): void
+    /**
+     * Patch locales.
+     *
+     * @param string $path
+     * @param string $locale
+     * @param string|null $driver
+     * @return void
+     */
+    public function patch(string $path, string $locale, ?string $driver = null): void
     {
         $this->locales[$locale] = isset($this->locales[$locale])
             ? array_merge($this->locales[$locale], $this->parse($path, $driver))
             : $this->parse($path, $driver);
     }
 
-    protected function getPath(string $locale)
+    /**
+     * @param string $locale
+     * @return string
+     */
+    protected function getPath(string $locale): string
     {
         return $this->config['path'] . '/' . $locale . '.' . $this->config['driver'];
     }
 
-    protected function parse(string $path, $driver = null)
+    /**
+     * @param string $path
+     * @param string|null $driver
+     * @return bool|array
+     *
+     * @throws Exception
+     */
+    protected function parse(string $path, ?string $driver = null): bool|array
     {
         if (!file_exists($path)) {
-            return;
+            return false;
         }
 
         switch ($driver ?? $this->config['driver']) {
@@ -51,7 +76,15 @@ class Localization extends AbstractPlugin
         }
     }
 
-    public function trans(string $key, ?array $replacements = null, string $locale = null)
+    /**
+     * Get localized text.
+     *
+     * @param string $key
+     * @param array|null $replacements
+     * @param string|null $locale
+     * @return string
+     */
+    public function trans(string $key, ?array $replacements = null, string $locale = null): string
     {
         $text = $this->getMessageText($key, $locale);
 
@@ -62,7 +95,12 @@ class Localization extends AbstractPlugin
         return $text;
     }
 
-    protected function getMessageText(string $key, string $locale = null)
+    /**
+     * @param string $key
+     * @param string|null $locale
+     * @return string
+     */
+    protected function getMessageText(string $key, string $locale = null): string
     {
         if (!$locale) {
             $locale = $this->locale;
