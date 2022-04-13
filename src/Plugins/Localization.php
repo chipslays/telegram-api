@@ -8,9 +8,12 @@ class Localization extends AbstractPlugin
 {
     protected array $locales = [];
 
+    public string $fallback;
+
     public function boot(): void
     {
-        $this->locale = $this->bot->getLanguageId() ?? $this->config['fallback'];
+        $this->fallback = $this->config['fallback'] ?? 'en';
+        $this->locale = $this->bot->getLanguageId() ??  $this->fallback;
         $this->load($this->locale);
     }
 
@@ -74,12 +77,12 @@ class Localization extends AbstractPlugin
         }
 
         // fallback
-        if (!isset($this->locales[$this->config['fallback']])) {
-            $this->load($this->config['fallback']);
+        if (!isset($this->locales[$this->fallback])) {
+            $this->load($this->fallback);
         }
 
-        if (isset($this->locales[$this->config['fallback']][$key])) {
-            return $this->locales[$this->config['fallback']][$key];
+        if (isset($this->locales[$this->fallback][$key])) {
+            return $this->locales[$this->fallback][$key];
         }
 
         return $key;
