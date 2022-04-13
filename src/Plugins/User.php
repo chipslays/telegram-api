@@ -32,9 +32,10 @@ class User extends AbstractPlugin
             return;
         }
 
-        $this->model->last_message_at = Carbon::now();
-        $this->model->is_blocked = false;
-        $this->model->save();
+        $this->update([
+            'last_message_at' => Carbon::now(),
+            'is_blocked' => false,
+        ]);
     }
 
     /**
@@ -59,21 +60,48 @@ class User extends AbstractPlugin
         return UserModel::where('id', $userId)->exists();
     }
 
-    public function __get($key): mixed
+    /**
+     * Get user attribute from database.
+     *
+     * @param mixed $key
+     * @return mixed
+     */
+    public function __get(mixed $key): mixed
     {
         return $this->model->{$key};
     }
 
-    public function __set($key, $value): void
+    /**
+     * Set database user attritube (without save, just set!).
+     *
+     * @param mixed $key
+     * @param mixed $value
+     * @return void
+     */
+    public function __set(mixed $key, mixed $value): void
     {
         $this->model->{$key} = $value;
     }
 
+    /**
+     * Get user attribute from database.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
     public function get(string $key, mixed $default = null): mixed
     {
         return $this->model->{$key} ?? $default;
     }
 
+    /**
+     * Set database user attritube (without save, just set!).
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
     public function set(string $key, mixed $value): self
     {
         $this->model->{$key} = $value;
@@ -81,11 +109,33 @@ class User extends AbstractPlugin
         return $this;
     }
 
+    /**
+     * Update user data in database.
+     *
+     * @param array $attributes
+     * @param array $options
+     * @return boolean
+     */
+    public function update(array $attributes = [], array $options = []): bool
+    {
+        return $this->model->update($attributes, $options);
+    }
+
+    /**
+     * Save the user model to the database.
+     *
+     * @return void
+     */
     public function save(): void
     {
         $this->model->save();
     }
 
+    /**
+     * Get user model.
+     *
+     * @return UserModel
+     */
     public function model(): UserModel
     {
         return $this->model;
