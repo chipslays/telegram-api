@@ -44,6 +44,12 @@ class Bot
 
     protected PluginManager $plugins;
 
+    /**
+     * Constructor.
+     *
+     * @param Api $api
+     * @param Config $config
+     */
     public function __construct(
         protected Api $api,
         protected Config $config = new Config
@@ -52,11 +58,25 @@ class Bot
         $this->plugins = new PluginManager($this);
     }
 
+    /**
+     * Load plugin or get plugin manager.
+     *
+     * @param array|null $plugins
+     * @return Manager|void
+     */
     public function plugins(array $plugins = null)
     {
         return $plugins ? $this->plugins->load($plugins) : $this->plugins;
     }
 
+    /**
+     * Get a plugin instance.
+     *
+     * E.g. $bot->plugin(ExamplePlugin::class)
+     *
+     * @param string $plugin
+     * @return void
+     */
     public function plugin(string $plugin)
     {
         $instance = $this->plugins->get($plugin);
@@ -68,6 +88,13 @@ class Bot
         return $instance;
     }
 
+    /**
+     * Raw call Telegram Bot API method.
+     *
+     * @param string $method
+     * @param array $parameters
+     * @return Response
+     */
     public function method(string $method, array $parameters = []): Response
     {
         return $this->api->method($method, $parameters);
@@ -102,6 +129,11 @@ class Bot
         return $this;
     }
 
+    /**
+     * @return void
+     *
+     * @throws Exception
+     */
     protected function boot()
     {
         if ($this->payload()->isCallbackQuery()) {
@@ -116,7 +148,7 @@ class Bot
             throw new Exception('User ID can\'t be a NULL.');
         }
     }
-
+    
     public function getChatId()
     {
         return $this->userId;
