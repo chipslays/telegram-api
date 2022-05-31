@@ -1,6 +1,6 @@
 <?php
 
-namespace Telegram;
+namespace Telegram\BotApi;
 
 use Telegram\Support\Collection;
 

@@ -2,5 +2,6 @@
 composer.lock
 vendor
 test.php
-examples/storage/*
-!examples/storage/.gitignore
+old
+helpers.old.php
+test.old.php

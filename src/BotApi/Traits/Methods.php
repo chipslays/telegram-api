@@ -1,23 +1,27 @@
 <?php
 
-namespace Telegram\Traits;
+namespace Telegram\BotApi\Traits;
 
 use Telegram\Response;
 use Telegram\Support\InputFile;
-use Telegram\Support\Util;
 
-trait BotApiMethods
+/**
+ * @method Response method(string $method, array $parameters = [])
+ */
+trait Methods
 {
+    /**
+     * @param array $parameters
+     * @param array|string|null $keyboard
+     * @param array $extra
+     * @return array
+     */
     public function mappingParameters(array $parameters = [], array|string|null $keyboard = null, array $extra = []): array
     {
         $parameters = array_merge($parameters, $extra);
 
         if ($keyboard && isset($this->keyboard)) {
             $parameters['reply_markup'] = is_array($keyboard) ? $this->keyboard->show($keyboard) : $keyboard;
-        }
-
-        if (isset($this->config)) {
-            $parameters['parse_mode'] = $this->config('telegram.parse_mode', 'html');
         }
 
         if (!empty($parameters['text'])) {
@@ -37,6 +41,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getupdates
+     *
+     * @return Response
      */
     public function getUpdates(int $offset = 0, int $limit = 100, array $extra = [])
     {
@@ -48,6 +54,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getme
+     *
+     * @return Response
      */
     public function getMe()
     {
@@ -56,6 +64,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#setwebhook
+     *
+     * @return Response
      */
     public function setWebhook(string $url, array $extra = [])
     {
@@ -67,6 +77,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#deletewebhook
+     *
+     * @return Response
      */
     public function deleteWebhook(bool $dropPendingUpdates = false)
     {
@@ -77,6 +89,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#getwebhookinfo
+     *
+     * @return Response
      */
     public function getWebhookInfo()
     {
@@ -85,6 +99,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#logout
+     *
+     * @return Response
      */
     public function logOut()
     {
@@ -93,6 +109,8 @@ trait BotApiMethods
 
     /**
      * @see https://core.telegram.org/bots/api#close
+     *
+     * @return Response
      */
     public function close()
     {
@@ -946,11 +964,11 @@ trait BotApiMethods
      */
     public function setMyCommands(array $commands, ?array $scope = null, ?string $language = null)
     {
-        return $this->method(__FUNCTION__, Util::trimArray([
+        return $this->method(__FUNCTION__, array_filter([
             'commands' => json_encode($commands),
             'scope' => $scope ? json_encode($scope) : '',
             'language_code' => $language ?? '',
-        ]));
+        ], 'strlen'));
     }
 
     /**
@@ -960,10 +978,10 @@ trait BotApiMethods
      */
     public function deleteMyCommands(?array $scope = null, ?string $language = null)
     {
-        return $this->method(__FUNCTION__, Util::trimArray([
+        return $this->method(__FUNCTION__, array_filter([
             'scope' => $scope ? json_encode($scope) : null,
             'language_code' => $language,
-        ]));
+        ], 'strlen'));
     }
 
     /**

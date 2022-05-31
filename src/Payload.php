@@ -12,6 +12,19 @@ class Payload extends Collection
         $this->bot = $bot;
     }
 
+    public function getChatForReply(): int|null
+    {
+        if ($this->isCallbackQuery()) {
+            return $this->get('*.message.chat.id');
+            // $this->languageId = $this->get('*.message.chat.language_code', $this->get('*.message.reply_to_message.from.language_code'));
+        } else {
+            return $this->get('*.from.id', $this->get('*.user.id', $this->get('*.chat.id')));
+            // $this->languageId = $this->get('*.from.language_code', $this->get('*.user.language_code'));
+        }
+
+        return null;
+    }
+
     /**
      * @return boolean
      */

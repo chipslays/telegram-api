@@ -6,5 +6,5 @@ use CURLFile;
 
 class InputFile extends CURLFile
 {
-
+    //
 }

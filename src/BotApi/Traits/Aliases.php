@@ -1,11 +1,11 @@
 <?php
 
-namespace Telegram\Traits;
+namespace Telegram\BotApi\Traits;
 
-use Telegram\Response;
-use Telegram\Support\Util;
-
-trait MethodsAliases
+/**
+ * @method Response method(string $method, array $parameters = [])
+ */
+trait Aliases
 {
     /**
      * Reply to message by chat or user ID.
@@ -37,8 +37,8 @@ trait MethodsAliases
     public function say($text, $keyboard = null, $extra = [])
     {
         return $this->sendMessage(
-            $this->getChatId(),
-            Util::shuffle($text),
+            $this->payload->getChatForReply(),
+            $text,
             $keyboard,
             $extra
         );
@@ -55,7 +55,7 @@ trait MethodsAliases
     public function reply($text, $keyboard = null, $extra = [])
     {
         return $this->sendMessage(
-            $this->getChatId(),
+            $this->payload->getChatForReply(),
             $text,
             $keyboard,
             array_merge($extra, ['reply_to_message_id' => $this->payload('*.message_id', $this->payload('*.*.message_id'))])
@@ -76,7 +76,7 @@ trait MethodsAliases
     {
         return $this->method('answerCallbackQuery', $this->mappingParameters([
             'callback_query_id' => $this->payload('callback_query.id'),
-            'text' => Util::shuffle($text),
+            'text' => $text,
             'show_alert' => false,
         ], null, $extra));
     }
@@ -95,7 +95,7 @@ trait MethodsAliases
     {
         return $this->method('answerCallbackQuery', $this->mappingParameters([
             'callback_query_id' => $this->payload('callback_query.id'),
-            'text' => Util::shuffle($text),
+            'text' => $text,
             'show_alert' => true,
         ], null, $extra));
     }
@@ -110,7 +110,7 @@ trait MethodsAliases
     public function status($action = 'typing', $extra = [])
     {
         return $this->method('sendChatAction', $this->mappingParameters([
-            'chat_id' => $this->getChatId(),
+            'chat_id' => $this->payload->getChatForReply(),
             'action' => $action,
         ], null, $extra));
     }
@@ -125,7 +125,7 @@ trait MethodsAliases
      */
     public function dice($emoji = '🎲', $keyboard = null, $extra = [])
     {
-        return $this->sendDice($this->getChatId(), $emoji, $keyboard, $extra);
+        return $this->sendDice($this->payload->getChatForReply(), $emoji, $keyboard, $extra);
     }
 
     /**
@@ -265,7 +265,7 @@ trait MethodsAliases
     public function print($data, $userId = null)
     {
         return $this->method('sendMessage', [
-            'chat_id' => $userId ?? $this->getChatId(),
+            'chat_id' => $userId ?? $this->payload->getChatForReply(),
             'text' => '<code>' . print_r($data, true) . '</code>',
             'parse_mode' => 'html',
         ]);
@@ -281,7 +281,7 @@ trait MethodsAliases
     public function dump($data, $userId = null)
     {
         return $this->method('sendMessage', [
-            'chat_id' => $userId ?? $this->getChatId(),
+            'chat_id' => $userId ?? $this->payload->getChatForReply(),
             'text' => '<code>' . var_export($data, true) . '</code>',
             'parse_mode' => 'html',
         ]);
@@ -297,7 +297,7 @@ trait MethodsAliases
     public function json($data, $userId = null)
     {
         return $this->method('sendMessage', [
-            'chat_id' => $userId ?? $this->getChatId(),
+            'chat_id' => $userId ?? $this->payload->getChatForReply(),
             'text' => '<code>' . json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</code>',
             'parse_mode' => 'html',
         ]);

@@ -1,13 +1,12 @@
 <?php
 
-namespace Telegram\Traits;
+namespace Telegram\BotApi\Traits;
 
-use Telegram\Response;
 use Telegram\Support\InputFile;
 
 trait Replies
 {
-    use BotApiMethods;
+    use Methods;
 
     /**
      * Possible `$action` values (default `typing`):
@@ -24,7 +23,7 @@ trait Replies
      */
     public function replyWithChatAction(string $action = 'typing')
     {
-        return $this->sendChatAction($this->getChatId(), $action);
+        return $this->sendChatAction($this->payload->getChatForReply(), $action);
     }
 
     /**
@@ -33,7 +32,7 @@ trait Replies
      */
     public function replyWithReply(string|int $messageId, string $text = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->sendReply($this->getChatId(), $messageId, $text, $keyboard, $extra);
+        return $this->sendReply($this->payload->getChatForReply(), $messageId, $text, $keyboard, $extra);
     }
 
     /**
@@ -42,7 +41,7 @@ trait Replies
      */
     public function replyWithText(string $text, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->sendMessage($this->getChatId(), $text, $keyboard, $extra);
+        return $this->sendMessage($this->payload->getChatForReply(), $text, $keyboard, $extra);
     }
 
     /**
@@ -51,7 +50,7 @@ trait Replies
      */
     public function replyWithForwardMessage(string|int $fromChatId, string|int $messageId, array $extra = [])
     {
-        return $this->forwardMessage($this->getChatId(), $fromChatId, $messageId, $extra);
+        return $this->forwardMessage($this->payload->getChatForReply(), $fromChatId, $messageId, $extra);
     }
 
     /**
@@ -60,7 +59,7 @@ trait Replies
      */
     public function replyWithCopyMessage(string|int $fromChatId, string|int $messageId, array $extra = [])
     {
-        return $this->copyMessage($this->getChatId(), $fromChatId, $messageId, $extra);
+        return $this->copyMessage($this->payload->getChatForReply(), $fromChatId, $messageId, $extra);
     }
 
     /**
@@ -69,7 +68,7 @@ trait Replies
      */
     public function replyWithPhoto(string|InputFile $photo, string $caption = '', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendPhoto($this->getChatId(), $photo, $caption, $keyboard, $extra);
+        return $this->sendPhoto($this->payload->getChatForReply(), $photo, $caption, $keyboard, $extra);
     }
 
     /**
@@ -78,7 +77,7 @@ trait Replies
      */
     public function replyWithAudio(string|InputFile $audio, string $caption = '', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendAudio($this->getChatId(), $audio, $caption, $keyboard, $extra);
+        return $this->sendAudio($this->payload->getChatForReply(), $audio, $caption, $keyboard, $extra);
     }
 
     /**
@@ -87,7 +86,7 @@ trait Replies
      */
     public function replyWithDocument(string|InputFile $document, string $caption = '', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendDocument($this->getChatId(), $document, $caption, $keyboard, $extra);
+        return $this->sendDocument($this->payload->getChatForReply(), $document, $caption, $keyboard, $extra);
     }
 
     /**
@@ -96,7 +95,7 @@ trait Replies
      */
     public function replyWithAnimation(string|InputFile $animation, string $caption = '', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendAnimation($this->getChatId(), $animation, $caption, $keyboard, $extra);
+        return $this->sendAnimation($this->payload->getChatForReply(), $animation, $caption, $keyboard, $extra);
     }
 
     /**
@@ -105,7 +104,7 @@ trait Replies
      */
     public function replyWithVideo(string|InputFile $video, string $caption = '', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendVideo($this->getChatId(), $video, $caption, $keyboard, $extra);
+        return $this->sendVideo($this->payload->getChatForReply(), $video, $caption, $keyboard, $extra);
     }
 
     /**
@@ -114,7 +113,7 @@ trait Replies
      */
     public function replyWithVideoNote(string|InputFile $videoNote, string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendVideoNote($this->getChatId(), $videoNote, $keyboard, $extra);
+        return $this->sendVideoNote($this->payload->getChatForReply(), $videoNote, $keyboard, $extra);
     }
 
     /**
@@ -123,7 +122,7 @@ trait Replies
      */
     public function replyWithSticker(string|InputFile $sticker, string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendSticker($this->getChatId(), $sticker, $keyboard, $extra);
+        return $this->sendSticker($this->payload->getChatForReply(), $sticker, $keyboard, $extra);
     }
 
     /**
@@ -132,7 +131,7 @@ trait Replies
      */
     public function replyWithVoice(string|InputFile $voice, string $caption = '', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendVoice($this->getChatId(), $voice, $caption, $keyboard, $extra);
+        return $this->sendVoice($this->payload->getChatForReply(), $voice, $caption, $keyboard, $extra);
     }
 
     /**
@@ -141,7 +140,7 @@ trait Replies
      */
     public function replyWithMediaGroup(array $media, $extra = [])
     {
-        return $this->sendMediaGroup($this->getChatId(), $media, $extra);
+        return $this->sendMediaGroup($this->payload->getChatForReply(), $media, $extra);
     }
 
     /**
@@ -150,7 +149,7 @@ trait Replies
      */
     public function replyWithLocation(int|float $latitude, int|float $longitude, string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendLocation($this->getChatId(), $latitude, $longitude, $keyboard, $extra);
+        return $this->sendLocation($this->payload->getChatForReply(), $latitude, $longitude, $keyboard, $extra);
     }
 
     /**
@@ -159,6 +158,6 @@ trait Replies
      */
     public function replyWithDice(string $emoji = '🎲', string|array|null $keyboard = null, array $extra = [])
     {
-        return $this->sendDice($this->getChatId(), $emoji, $keyboard, $extra);
+        return $this->sendDice($this->payload->getChatForReply(), $emoji, $keyboard, $extra);
     }
 }
