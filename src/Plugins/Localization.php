@@ -13,7 +13,7 @@ class Localization extends AbstractPlugin
     public function boot(): void
     {
         $this->fallback = $this->config['fallback'] ?? 'en';
-        $this->locale = $this->bot->getLanguageId() ??  $this->fallback;
+        $this->locale = $this->bot->payload()->getLanguageCode() ??  $this->fallback;
         $this->load($this->locale);
     }
 

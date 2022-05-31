@@ -16,6 +16,13 @@ trait Eventable
 
     protected bool $eventsIsSkipped = false;
 
+    /**
+     * @param string|array $pattern
+     * @param callable $handler
+     * @param array $middlewares
+     * @param integer $sort
+     * @return self
+     */
     public function on(string|array $pattern, callable $handler, array $middlewares = [], int $sort = 500): self
     {
         $this->events[$sort][] = compact('pattern', 'handler', 'middlewares');
@@ -34,9 +41,9 @@ trait Eventable
             call_user_func_array($fn, [$this]);
         }
 
-        // foreach ($this->plugins->all() as $plugin) {
-        //     call_user_func([$plugin, 'onBeforeRun']);
-        // }
+        foreach ($this->plugins->all() as $plugin) {
+            call_user_func([$plugin, 'onBeforeRun']);
+        }
 
         if (!$this->eventsIsSkipped()) {
             $processed = $this->processEvents();
@@ -63,9 +70,9 @@ trait Eventable
             call_user_func_array($fn, [$this]);
         }
 
-        // foreach ($this->plugins->all() as $plugin) {
-        //     call_user_func([$plugin, 'onAfterRun']);
-        // }
+        foreach ($this->plugins->all() as $plugin) {
+            call_user_func([$plugin, 'onAfterRun']);
+        }
 
         // reset for polling
         $this->events = [];
@@ -182,17 +189,34 @@ trait Eventable
         return false;
     }
 
-    public function onBeforeRun(callable $fn, int $sort = 500)
+    /**
+     * @param callable $fn
+     * @param integer $sort
+     * @return void
+     */
+    public function onBeforeRun(callable $fn, int $sort = 500): void
     {
         $this->beforeRun[$sort][] = $fn;
     }
 
-    public function onAfterRun(callable $fn, int $sort = 500)
+    /**
+     * @param callable $fn
+     * @param integer $sort
+     * @return void
+     */
+    public function onAfterRun(callable $fn, int $sort = 500): void
     {
         $this->afterRun[$sort][] = $fn;
     }
 
-    public function onFallback(string|array $pattern, callable $fn)
+    /**
+     * Default answer if event not found.
+     *
+     * @param string|array $pattern
+     * @param callable $fn
+     * @return void
+     */
+    public function fallback(string|array $pattern, callable $fn): void
     {
         $this->fallbackRun[] = compact('pattern', 'fn');
     }
@@ -200,7 +224,7 @@ trait Eventable
     /**
      * @return void
      */
-    public function skipEvents()
+    public function skipEvents(): void
     {
         $this->eventsIsSkipped = true;
     }
@@ -208,7 +232,7 @@ trait Eventable
     /**
      * @return void
      */
-    public function unskipEvents()
+    public function unskipEvents(): void
     {
         $this->eventsIsSkipped = false;
     }

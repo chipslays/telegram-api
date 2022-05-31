@@ -6,6 +6,9 @@ use Telegram\Support\Collection;
 
 class Payload extends Collection
 {
+    protected $_defaultChatForReply = false;
+    protected $_defaultLanguageId = false;
+
     public function __construct(array $payload, protected Bot &$bot)
     {
         $this->items = $payload;
@@ -14,12 +17,37 @@ class Payload extends Collection
 
     public function getChatForReply(): int|null
     {
+        if ($this->_defaultChatForReply !== false) {
+            return $this->_defaultChatForReply;
+        }
+
         if ($this->isCallbackQuery()) {
-            return $this->get('*.message.chat.id');
+            $this->_defaultChatForReply = $this->get('*.message.chat.id');
             // $this->languageId = $this->get('*.message.chat.language_code', $this->get('*.message.reply_to_message.from.language_code'));
+
+            return $this->_defaultChatForReply;
         } else {
-            return $this->get('*.from.id', $this->get('*.user.id', $this->get('*.chat.id')));
+            $this->_defaultChatForReply = $this->get('*.from.id', $this->get('*.user.id', $this->get('*.chat.id')));
             // $this->languageId = $this->get('*.from.language_code', $this->get('*.user.language_code'));
+
+            return $this->_defaultChatForReply;
+        }
+
+        return null;
+    }
+
+    public function getLanguageCode(): string|null
+    {
+        if ($this->_defaultLanguageId !== false) {
+            return $this->_defaultLanguageId;
+        }
+
+        if ($this->isCallbackQuery()) {
+            $this->_defaultLanguageId = $this->get('*.message.chat.language_code', $this->get('*.message.reply_to_message.from.language_code'));
+            return $this->_defaultLanguageId;
+        } else {
+            $this->_defaultLanguageId = $this->get('*.from.language_code', $this->get('*.user.language_code'));
+            return $this->_defaultLanguageId;
         }
 
         return null;

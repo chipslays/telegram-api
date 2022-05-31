@@ -7,21 +7,30 @@ use Telegram\BotApi\Response;
 use Telegram\BotApi\Traits\Methods as BotApiMethods;
 use Telegram\BotApi\Traits\Aliases as BotApiMethodAliases;
 use Telegram\BotApi\Traits\Replies as BotApiMethodReplies;
+use Telegram\Plugins\Manager as PluginManager;
 use Telegram\Traits\Eventable;
 use Telegram\Support\Traits\Variable;
 use Telegram\Exceptions\BotException;
 use Illuminate\Support\Traits\Conditionable;
+use Telegram\Traits\Componentable;
+use Telegram\Traits\PluginMethods;
 
 class Bot
 {
     use Eventable;
+    use Componentable;
     use BotApiMethods;
     use BotApiMethodAliases;
     use BotApiMethodReplies;
     use Conditionable;
     use Variable;
+    use PluginMethods;
 
     public Payload $payload;
+
+    protected Keyboard $keyboard;
+
+    protected PluginManager $plugins;
 
     protected $components = [];
 
@@ -30,7 +39,8 @@ class Bot
         public Config $config = new Config,
     )
     {
-        //
+        $this->keyboard = new Keyboard($this);
+        $this->plugins = new PluginManager($this);
     }
 
     /**
@@ -51,7 +61,7 @@ class Bot
      * @param array|null $payload
      * @return self
      *
-     * @throws Exception
+     * @throws BotException
      */
     public function withWebhook(array $payload = null): self
     {
@@ -131,26 +141,141 @@ class Bot
         $this->run();
     }
 
-    protected function runComponents()
+    /**
+     * Load plugin or get plugin manager.
+     *
+     * @param array|null $plugins
+     * @return Manager|void
+     */
+    public function plugins(array $plugins = null)
     {
-        foreach ($this->components as $component) {
-            if (file_exists($component['entrypoint'] ?? null)) {
-                $fn = function ($bot, $config) use ($component) {
-                    require $component['entrypoint'];
-                };
-                call_user_func_array($fn, [$this, $component['config'] ?? []]);
-            }
-        }
+        return $plugins ? $this->plugins->load($plugins) : $this->plugins;
     }
 
     /**
-     * Set components.
+     * Get a plugin instance.
      *
-     * @param array $components
+     * E.g. $bot->plugin(ExamplePlugin::class)
+     *
+     * @param string $plugin
      * @return void
      */
-    public function components(array $components): void
+    public function plugin(string $plugin)
     {
-        $this->components = array_merge($this->components, $components);
+        $instance = $this->plugins->get($plugin);
+
+        if (!$instance) {
+            throw new BotException("Plugin '{$plugin}' not exists.");
+        }
+
+        return $instance;
+    }
+
+    /**
+     * Get `Keyboard` instance or make keyboard (by method `Keyboard::show(...)`) if arguments was passed.
+     *
+     * @param array|string $keyboard
+     * @param string|null $placeholder
+     * @param boolean $oneTime
+     * @param boolean $resize
+     * @param boolean $selective
+     * @return string|Keyboard
+     */
+    public function keyboard(
+        array|string $keyboard = null,
+        ?string $placeholder = null,
+        bool $oneTime = false,
+        bool $resize = true,
+        bool $selective = false
+    ): string|Keyboard
+    {
+        if (func_num_args() === 0 || $keyboard === null) {
+            return $this->keyboard;
+        }
+
+        return $this->keyboard->show($keyboard, $placeholder, $oneTime, $resize, $selective);
+    }
+
+    /**
+     * @param boolean|string $needle
+     * @param string|null|null $next
+     * @param callable|null $handler
+     * @param array $excepts
+     * @return self
+     */
+    public function conversation(bool|string $needle, string|null $next = null, callable $handler = null, array $excepts = []): self
+    {
+        if ($needle === false) {
+            $this->session()->delete('telegram:conversation');
+            return $this;
+        }
+
+        if ($this->hasConversationMatchExcepts($excepts)) {
+            return $this;
+        }
+
+        if (func_num_args() == 1) {
+            $this->session(['telegram:conversation' => $needle]);
+            $this->var(['telegram:conversation_skip' => true]);
+            return $this;
+        }
+
+        if ($this->var('telegram:conversation_skip')) {
+            return $this;
+        }
+
+        if ($this->session('telegram:conversation') !== $needle) {
+            return $this;
+        }
+
+        $this->var(['telegram:conversation_skip' => true]);
+
+        $result = call_user_func_array($handler, [$this]);
+
+        if ($result !== false) {
+            if ($next === null) {
+                $this->session()->delete('telegram:conversation');
+            } else {
+                $this->session(['telegram:conversation' => $next]);
+            }
+        }
+
+        $this->skipEvents();
+
+        return $this;
+    }
+
+    /**
+     * @param array $excepts
+     * @return boolean
+     */
+    protected function hasConversationMatchExcepts(array $excepts): bool
+    {
+        foreach ($excepts as $event) {
+            foreach ((array) $event as $key => $value) {
+                if ($value === true) {
+                    return true;
+                }
+
+                // 'message.text'
+                // ['message', 'callback_query]
+                if (is_numeric($key) && $this->payload()->has($value)) {
+                    return true;
+                }
+
+                // ['message.text' => 'text']
+                // ['message.text' => ['text1', 'text2]]
+                if (!is_numeric($key)) {
+                    foreach ((array) $value as $needle) {
+                        $result = $this->match($needle, $this->payload($key, ''));
+                        if ($result !== false) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

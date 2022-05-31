@@ -3,5 +3,6 @@ composer.lock
 vendor
 test.php
 old
+__old
 helpers.old.php
 test.old.php

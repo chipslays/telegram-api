@@ -12,17 +12,12 @@ $bot = new Bot($api);
 $bot->withWebhook([
     'message' => [
         'from' => ['id' => 436432850],
-        'text' => '/version',
+        'text' => '/start',
     ],
 ]);
 
-$bot->components([
-    [
-        'entrypoint' => __DIR__ . '/VersionComponent.php',
-        'config' => [
-            'version' => '1.0.0',
-        ],
-    ] ,
-]);
+$bot->plugins(require __DIR__ . '/plugins.config.php');
+
+// handle events here
 
 $bot->listen();

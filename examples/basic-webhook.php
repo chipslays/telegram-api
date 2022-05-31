@@ -3,9 +3,9 @@
 use Telegram\Bot;
 use Telegram\BotApi\Client;
 
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-$api = new Client('1436866061:AAGpbiuM0gsYc1uH-DdI5uYsCStl7e9NFZY');
+$api = new Client('BOT_TOKEN');
 
 $bot = new Bot($api);
 
