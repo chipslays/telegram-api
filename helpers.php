@@ -132,3 +132,35 @@ if (!function_exists('after')) {
         bot($bot)->onAfterRun($function);
     }
 }
+
+if (!function_exists('copy_dir_to')) {
+    /**
+     * Copy dir with all files.
+     *
+     * @param string $src
+     * @param string $dist
+     * @param bool $withReplace
+     * @return void
+     */
+    function copy_dir_to(string $src, string $dist, bool $withReplace = false) {
+        $dir = opendir($src);
+
+        @mkdir($dist);
+
+        while ($file = readdir($dir)) {
+            if (($file != '.') && ($file != '..')) {
+                $srcPath = $src . '/' . $file;
+                if (is_dir($srcPath)) {
+                    (__FUNCTION__)($srcPath, $dist . '/' . $file);
+                } else {
+                    if (file_exists($dist . '/' . $file) && !$withReplace) {
+                        continue;
+                    }
+                    copy($srcPath, $dist . '/' . $file);
+                }
+            }
+        }
+
+        closedir($dir);
+    }
+}

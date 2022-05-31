@@ -33,6 +33,6 @@ class FileDriver extends AbstractDriver implements DriverInterface
 
     protected function getPath(string|int $key): string
     {
-        return rtrim($this->config['path'], '\\/') . '/' . md5($key) . '.strg';
+        return rtrim($this->config['path'], '\\/') . '/' . md5($key) . '.storage';
     }
 }

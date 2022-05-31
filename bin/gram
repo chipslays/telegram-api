@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+
+use Telegram\Terminal;
+
+include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+
+switch ($argv[1] ?? null) {
+    case 'template:standalone':
+        if (!isset($argv[2])) {
+            return Terminal::print('{text:red}Error: Provide destination path for copy files.');
+        }
+
+        $path = rtrim($argv[2], '/\\');
+
+        copy_dir_to(__DIR__ . '/../template/standalone', $path);
+        Terminal::print("{white}1. template copied to " . realpath($path));
+
+        Terminal::print("{white}2. merge .gitignore...");
+        file_put_contents($path . '/.gitignore', file_get_contents($path . '/.gitignore.merge'));
+        unlink($path . '/.gitignore.merge');
+
+        Terminal::print("{white}3. merge composer.json...");
+        $composerInject = json_decode(file_get_contents($path . 'composer.json.merge'), true);
+        $composerJson = json_decode(file_get_contents($path . 'composer.json'), true);
+        file_put_contents($path . '/composer.json', json_encode(
+            array_replace_recursive($composerJson, $composerInject),
+            JSON_UNESCAPED_UNICODE, JSON_PRETTY_PRINT,
+        ));
+
+        unlink($path . '/composer.json.merge');
+
+        Terminal::print('{text:darkGreen}✅ Successfuly copied!');
+        Terminal::print('{bg:cyan}{text:white} 📁 ' . realpath($path));
+        Terminal::print('{text:white} Setup database and run {text:lightGreen}`php gram migrate up`{reset}.');
+        break;
+
+    default:
+        Terminal::print('{text:darkGreen}List of commands:');
+        Terminal::print('    {text:white}template:standalone [path] {reset}- Quick start as Standalone project. [e.g. template:standalone ./AwesomeBot]');
+        break;
+}

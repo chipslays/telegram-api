@@ -28,12 +28,26 @@ trait Methods
             $parameters['text'] = implode("\n", array_map('trim', explode("\n", $parameters['text'])));
             $parameters['text'] = str_replace('<<<', '«', $parameters['text']);
             $parameters['text'] = str_replace('>>>', '»', $parameters['text']);
+
+            // message like ->say('%hello%')
+            if (str_starts_with($parameters['text'], '%') && str_ends_with($parameters['text'], '%')) {
+                $parameters['text'] = $this->trans(
+                    mb_substr($parameters['text'], 1, -1)
+                );
+            }
         }
 
         if (!empty($parameters['caption'])) {
             $parameters['caption'] = implode("\n", array_map('trim', explode("\n", $parameters['caption'])));
             $parameters['caption'] = str_replace('<<<', '«', $parameters['caption']);
             $parameters['caption'] = str_replace('>>>', '»', $parameters['caption']);
+
+            // message like ->say('%hello%')
+            if (str_starts_with($parameters['caption'], '%') && str_ends_with($parameters['caption'], '%')) {
+                $parameters['caption'] = $this->trans(
+                    mb_substr($parameters['caption'], 1, -1)
+                );
+            }
         }
 
         return $parameters;
