@@ -21,25 +21,18 @@ $bot->plugins(arr_where($plugins, fn ($item) => $item['plugin'] == Database::cla
 $migrator = new Migrator($bot);
 
 switch (strtolower($argv[1] ?? '')) {
-    case 'migrate':
-            switch ($argv[2]) {
-                case 'up':
-                    $migrator->up('users');
-                    Terminal::print('{text:darkGreen}✅ Migration was UP.');
-                    break;
+    case 'migrate:up':
+        $migrator->up('users');
+        Terminal::print('{text:green}✅ Migration was UP.');
+        break;
 
-                case 'down':
-                    if (mb_strtolower(Terminal::ask('Drop all Telegram tables?')) == 'y') {
-                        $migrator->down('users');
-                        Terminal::print('{text:darkGreen}✅ Migration was DOWN.');
-                    } else {
-                        Terminal::print('{text:yellow}Operation was canceled.');
-                    }
-                    break;
-
-                default:
-                    die('Bad parameter: php migration [up, down]');
-            }
+    case 'migrate:down':
+        if (mb_strtolower(Terminal::ask('Drop all Telegram tables?')) == 'y') {
+            $migrator->down('users');
+            Terminal::print('{text:green}✅ Migration was DOWN.');
+        } else {
+            Terminal::print('{text:yellow}Operation was canceled.');
+        }
         break;
 
     default:
