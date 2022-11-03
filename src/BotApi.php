@@ -1,21 +1,83 @@
 <?php
 
-namespace Telegram\BotApi\Traits;
+namespace Telegram;
 
+use CurlHandle;
 use Telegram\Response;
-use Telegram\Support\InputFile;
+use Telegram\Exceptions\BotApiException;
+use Telegram\Exceptions\HttpClientException;
 
-/**
- * @method Response method(string $method, array $parameters = [])
- */
-trait Methods
+class BotApi
 {
-    /**
-     * @param array $parameters
-     * @param array|string|null $keyboard
-     * @param array $extra
-     * @return array
-     */
+    protected CurlHandle $httpClient;
+
+    public function __construct(protected string $token, array $curlOptions = [])
+    {
+        $this->httpClient = curl_init();
+
+        $defaultOptions = [
+            CURLOPT_ENCODING => '',
+            CURLOPT_RESOLVE => ['api.telegram.org:443:api.telegram.org'],
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_HTTPHEADER => ['Content-Type: multipart/form-data'],
+            CURLOPT_TIMEOUT => 3600,
+            CURLOPT_CONNECTTIMEOUT => 30,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+        ];
+
+        curl_setopt_array($this->httpClient, array_replace($defaultOptions, $curlOptions));
+    }
+
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    public function setToken($token): self
+    {
+        $this->token = $token;
+
+        return $this;
+    }
+
+    public function call(string $method, array $parameters = []): Response
+    {
+        curl_setopt($this->httpClient, CURLOPT_URL, 'https://api.telegram.org/bot' . $this->token . '/' . $method);
+        curl_setopt($this->httpClient, CURLOPT_POSTFIELDS, $parameters);
+
+        $output = curl_exec($this->httpClient);
+
+        if (curl_error($this->httpClient)) {
+            throw new HttpClientException(
+                sprintf(
+                    '[%d] %s -> [%s] parameters: %s',
+                    curl_errno($this->httpClient),
+                    curl_error($this->httpClient),
+                    $method,
+                    json_encode($parameters)
+                )
+            );
+        }
+
+        $response = new Response(json_decode($output, true));
+
+        if (!$response->ok) {
+            throw new BotApiException(
+                sprintf(
+                    '[%d] %s -> method: %s, parameters: %s',
+                    $response->error_code,
+                    $response->description,
+                    $method,
+                    json_encode($parameters)
+                ),
+                $response->error_code
+            );
+        }
+
+        return $response;
+    }
+
     public function mappingParameters(array $parameters = [], array|string|null $keyboard = null, array $extra = []): array
     {
         $parameters = array_merge($parameters, $extra);
@@ -60,7 +122,7 @@ trait Methods
      */
     public function getUpdates(int $offset = 0, int $limit = 100, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'offset' => $offset,
             'limit' => $limit,
         ], extra: $extra));
@@ -73,7 +135,7 @@ trait Methods
      */
     public function getMe()
     {
-        $this->method(__FUNCTION__);
+        $this->call(__FUNCTION__);
     }
 
     /**
@@ -83,7 +145,7 @@ trait Methods
      */
     public function setWebhook(string $url, array $extra = [])
     {
-        return $this->method(__FUNCTION__, array_merge([
+        return $this->call(__FUNCTION__, array_merge([
             'url' => $url,
             'max_connections' => 100,
         ], $extra));
@@ -96,7 +158,7 @@ trait Methods
      */
     public function deleteWebhook(bool $dropPendingUpdates = false)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'drop_pending_updates' => $dropPendingUpdates,
         ]);
     }
@@ -108,7 +170,7 @@ trait Methods
      */
     public function getWebhookInfo()
     {
-        return $this->method(__FUNCTION__);
+        return $this->call(__FUNCTION__);
     }
 
     /**
@@ -118,7 +180,7 @@ trait Methods
      */
     public function logOut()
     {
-        return $this->method(__FUNCTION__);
+        return $this->call(__FUNCTION__);
     }
 
     /**
@@ -128,7 +190,7 @@ trait Methods
      */
     public function close()
     {
-        return $this->method(__FUNCTION__);
+        return $this->call(__FUNCTION__);
     }
 
     /**
@@ -148,7 +210,7 @@ trait Methods
      */
     public function sendChatAction(string|int $chatId, string $action = 'typing')
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'action' => $action,
         ]);
@@ -161,7 +223,7 @@ trait Methods
      */
     public function sendMessage(string|int $chatId, string $text, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'text' => $text,
         ], $keyboard, $extra));
@@ -174,7 +236,7 @@ trait Methods
      */
     public function forwardMessage(string|int $chatId, string|int $fromChatId, string|int $messageId, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'from_chat_id' => $fromChatId,
             'message_id' => $messageId,
@@ -188,7 +250,7 @@ trait Methods
      */
     public function copyMessage(string|int $fromChatId, string|int $toChatId, string|int $messageId, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $toChatId,
             'from_chat_id' => $fromChatId,
             'message_id' => $messageId,
@@ -202,7 +264,7 @@ trait Methods
      */
     public function sendPoll(string|int $chatId, string $question, array $options, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'question' => $question,
             'options' => json_encode($options),
@@ -216,7 +278,7 @@ trait Methods
      */
     public function sendPhoto(string|int $chatId, string|InputFile $photo, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'photo' => $photo,
@@ -230,7 +292,7 @@ trait Methods
      */
     public function sendAudio(string|int $chatId, string|InputFile $audio, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'audio' => $audio,
@@ -244,7 +306,7 @@ trait Methods
      */
     public function sendDocument(string|int $chatId, string|InputFile $document, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'document' => $document,
@@ -258,7 +320,7 @@ trait Methods
      */
     public function sendAnimation(string|int $chatId, string|InputFile $animation, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'animation' => $animation,
@@ -272,7 +334,7 @@ trait Methods
      */
     public function sendVideo(string|int $chatId, string|InputFile $video, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'video' => $video,
@@ -286,7 +348,7 @@ trait Methods
      */
     public function sendVideoNote(string|int $chatId, string|InputFile $videoNote, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'video_note' => $videoNote,
@@ -300,7 +362,7 @@ trait Methods
      */
     public function sendSticker(string|int $chatId, string|InputFile $sticker, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'sticker' => $sticker,
         ], $keyboard, $extra), true);
@@ -313,7 +375,7 @@ trait Methods
      */
     public function sendVoice(string|int $chatId, string|InputFile $voice, string $caption = '', array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'caption' => $caption,
             'voice' => $voice,
@@ -327,7 +389,7 @@ trait Methods
      */
     public function sendMediaGroup(string|int $chatId, array $media, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'media' => json_encode($media),
         ], extra: $extra), true);
@@ -340,7 +402,7 @@ trait Methods
      */
     public function sendLocation(string|int $chatId, int|float $latitude, int|float $longitude, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'latitude' => $latitude,
             'longitude' => $longitude,
@@ -367,7 +429,7 @@ trait Methods
         $emoji = str_ireplace(['football'], '⚽️', $emoji);
         $emoji = str_ireplace(['777', 'slots'], '🎰', $emoji);
 
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'emoji' => $emoji,
         ], $keyboard, $extra));
@@ -380,7 +442,7 @@ trait Methods
      */
     public function getUserProfilePhotos(string|int $userId, int $offset = 0, int $limit = 100)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'user_id' => $userId,
             'offset' => $offset,
             'limit' => $limit,
@@ -394,7 +456,7 @@ trait Methods
      */
     public function getFile(string $fileId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'file_id' => $fileId,
         ]);
     }
@@ -406,7 +468,7 @@ trait Methods
      */
     public function banChatMember(string|int $chatId, string|int $userId, int $untilDate, bool $revokeMessages = false)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
             'until_date' => $untilDate,
@@ -421,7 +483,7 @@ trait Methods
      */
     public function unbanChatMember(string|int $chatId, string|int $userId, bool $onlyIfBanned = false)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
             'only_if_banned' => $onlyIfBanned,
@@ -435,7 +497,7 @@ trait Methods
      */
     public function restrictChatMember(string|int $chatId, string|int $userId, int $untilDate, array $permissions = [])
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
             'permissions' => json_encode($permissions),
@@ -450,7 +512,7 @@ trait Methods
      */
     public function promoteChatMember(string|int $chatId, string|int $userId, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'user_id' => $userId,
         ], extra: $extra));
@@ -463,7 +525,7 @@ trait Methods
      */
     public function setChatAdministratorCustomTitle(string|int $chatId, string|int $userId, string $title = '')
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
             'custom_title' => $title,
@@ -477,7 +539,7 @@ trait Methods
      */
     public function setChatPermissions(string|int $chatId, array $permissions)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'permissions' => json_encode($permissions),
         ]);
@@ -490,7 +552,7 @@ trait Methods
      */
     public function exportChatInviteLink(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -502,7 +564,7 @@ trait Methods
      */
     public function createChatInviteLink(string|int $chatId, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
         ], extra: $extra));
     }
@@ -514,7 +576,7 @@ trait Methods
      */
     public function editChatInviteLink(string|int $chatId, string $inviteLink, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'invite_link' => $inviteLink,
         ], extra: $extra));
@@ -527,7 +589,7 @@ trait Methods
      */
     public function revokeChatInviteLink(string|int $chatId, string $inviteLink)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'invite_link' => $inviteLink,
         ]);
@@ -540,7 +602,7 @@ trait Methods
      */
     public function approveChatJoinRequest(string|int $chatId, string|int $userId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
         ]);
@@ -553,7 +615,7 @@ trait Methods
      */
     public function declineChatJoinRequest(string|int $chatId, string|int $userId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
         ]);
@@ -566,7 +628,7 @@ trait Methods
      */
     public function setChatPhoto(string|int $chatId, InputFile $photo)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'photo' => $photo,
         ]);
@@ -579,7 +641,7 @@ trait Methods
      */
     public function deleteChatPhoto(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -591,7 +653,7 @@ trait Methods
      */
     public function setChatTitle(string|int $chatId, string $title)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'title' => $title,
         ]);
@@ -604,7 +666,7 @@ trait Methods
      */
     public function setChatDescription(string|int $chatId, string $description = '')
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'description' => $description,
         ]);
@@ -617,7 +679,7 @@ trait Methods
      */
     public function pinChatMessage(string|int $chatId, string|int $messageId, bool $disableNotification = false)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'message_id' => $messageId,
             'disable_notification' => $disableNotification,
@@ -631,7 +693,7 @@ trait Methods
      */
     public function unpinChatMessage(string|int $chatId, string|int $messageId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'message_id' => $messageId,
         ]);
@@ -644,7 +706,7 @@ trait Methods
      */
     public function unpinAllChatMessages(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -656,7 +718,7 @@ trait Methods
      */
     public function leaveChat(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -668,7 +730,7 @@ trait Methods
      */
     public function getChat(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -680,7 +742,7 @@ trait Methods
      */
     public function getChatAdministrators(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -692,7 +754,7 @@ trait Methods
      */
     public function getChatMemberCount(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -704,7 +766,7 @@ trait Methods
      */
     public function getChatMember(string|int $chatId, string|int $userId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'user_id' => $userId,
         ]);
@@ -717,7 +779,7 @@ trait Methods
      */
     public function setChatStickerSet(string|int $chatId, string $stickerSetName)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'sticker_set_name' => $stickerSetName,
         ]);
@@ -730,7 +792,7 @@ trait Methods
      */
     public function deleteChatStickerSet(string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
         ]);
     }
@@ -742,7 +804,7 @@ trait Methods
      */
     public function editMessageText(string|int $messageId, string|int $chatId, string $text, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'message_id' => $messageId,
             'text' => $text,
@@ -756,7 +818,7 @@ trait Methods
      */
     public function editMessageCaption(string|int $messageId, string|int $chatId, string $caption, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'message_id' => $messageId,
             'caption' => $caption,
@@ -770,7 +832,7 @@ trait Methods
      */
     public function editMessageMedia(string|int $messageId, string|int $chatId, array $media, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'message_id' => $messageId,
             'media' => json_encode($media),
@@ -784,7 +846,7 @@ trait Methods
      */
     public function editMessageReplyMarkup(string|int $messageId, string|int $chatId, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'message_id' => $messageId,
         ], $keyboard, $extra));
@@ -797,7 +859,7 @@ trait Methods
      */
     public function stopPoll(string|int $messageId, string|int $chatId, array|string|null $keyboard = null)
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'message_id' => $messageId,
         ], $keyboard));
@@ -810,7 +872,7 @@ trait Methods
      */
     public function deleteMessage(string|int $messageId, string|int $chatId)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'chat_id' => $chatId,
             'message_id' => $messageId,
         ]);
@@ -823,7 +885,7 @@ trait Methods
      */
     public function getStickerSet(string $name)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'name' => $name,
         ]);
     }
@@ -835,7 +897,7 @@ trait Methods
      */
     public function deleteStickerFromSet(string $sticker)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'sticker' => $sticker,
         ]);
     }
@@ -847,7 +909,7 @@ trait Methods
      */
     public function uploadStickerFile(string|int $userId, InputFile $image)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'user_id' => $userId,
             'png_sticker' => $image,
         ], true);
@@ -860,7 +922,7 @@ trait Methods
      */
     public function createNewStickerSet(string|int $userId, string $name, string $title, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'user_id' => $userId,
             'name' => $name,
             'title' => $title,
@@ -874,7 +936,7 @@ trait Methods
      */
     public function addStickerToSet(string|int $userId, string $name, string $emojis, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'user_id' => $userId,
             'name' => $name,
             'emojis' => $emojis,
@@ -888,7 +950,7 @@ trait Methods
      */
     public function setStickerPositionInSet(string $sticker, int $position)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'sticker' => $sticker,
             'position' => $position,
         ]);
@@ -901,7 +963,7 @@ trait Methods
      */
     public function setStickerSetThumb(string|int $userId, string $name, InputFile|string $thumb)
     {
-        return $this->method(__FUNCTION__, [
+        return $this->call(__FUNCTION__, [
             'user_id' => $userId,
             'name' => $name,
             'thumb' => $thumb,
@@ -915,7 +977,7 @@ trait Methods
      */
     public function sendGame(string|int $chatId, string $name, array|string|null $keyboard = null, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'chat_id' => $chatId,
             'game_short_name' => $name,
         ], $keyboard, $extra));
@@ -928,7 +990,7 @@ trait Methods
      */
     public function setGameScore(string|int $userId, int $score, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'user_id' => $userId,
             'score' => $score,
         ], extra: $extra));
@@ -941,7 +1003,7 @@ trait Methods
      */
     public function getGameHighScores(string|int $userId, array $extra = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'user_id' => $userId,
         ], extra: $extra));
     }
@@ -953,7 +1015,7 @@ trait Methods
      */
     public function answerCallbackQuery(array $parameters = [])
     {
-        return $this->method(__FUNCTION__, $this->mappingParameters([
+        return $this->call(__FUNCTION__, $this->mappingParameters([
             'callback_query_id' => $this->payload('callback_query.id'),
         ], extra: $parameters));
     }
@@ -965,7 +1027,7 @@ trait Methods
      */
     public function answerInlineQuery(array $results = [], array $extra = [])
     {
-        return $this->method(__FUNCTION__, array_merge([
+        return $this->call(__FUNCTION__, array_merge([
             'inline_query_id' => $this->payload('inline_query.id'),
             'results' => json_encode($results),
         ], $extra));
@@ -978,7 +1040,7 @@ trait Methods
      */
     public function setMyCommands(array $commands, ?array $scope = null, ?string $language = null)
     {
-        return $this->method(__FUNCTION__, array_filter([
+        return $this->call(__FUNCTION__, array_filter([
             'commands' => json_encode($commands),
             'scope' => $scope ? json_encode($scope) : '',
             'language_code' => $language ?? '',
@@ -992,7 +1054,7 @@ trait Methods
      */
     public function deleteMyCommands(?array $scope = null, ?string $language = null)
     {
-        return $this->method(__FUNCTION__, array_filter([
+        return $this->call(__FUNCTION__, array_filter([
             'scope' => $scope ? json_encode($scope) : null,
             'language_code' => $language,
         ], 'strlen'));
@@ -1005,6 +1067,6 @@ trait Methods
      */
     public function getMyCommands()
     {
-        return $this->method(__FUNCTION__);
+        return $this->call(__FUNCTION__);
     }
 }
